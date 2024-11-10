@@ -1,19 +1,30 @@
 // src/types/game.ts
 export type CardType = 'ally' | 'enemy';
+export type CardCategory = 'unit' | 'field';
+
+export type CardEffectType = 
+  | 'SELF_POWER_UP_BY_ENEMY_LINE'  // 自身への効果：敵ユニットライン
+  | 'SELF_POWER_UP_BY_ADJACENT_ALLY'  // 自身への効果：隣接味方
+  | 'ADJACENT_UNIT_BUFF'  // 周囲ユニットへの効果：バフ
+  | 'ADJACENT_UNIT_DEBUFF'  // 周囲ユニットへの効果：デバフ
+  | 'FIELD_UNIT_BUFF'  // フィールド効果：ユニットバフ
+  | 'FIELD_UNIT_DEBUFF';  // フィールド効果：ユニットデバフ
 
 export type CardEffect = {
-    type: 'BUFF_ADJACENT' | 'DAMAGE_ADJACENT' | 'POWER_UP_BY_ENEMY_LINE' | 'POWER_UP_BY_ALLY' | 'RANGE_BUFF' | 'FIELD_BUFF';
+    type: CardEffectType;
     power: number;
-    range?: number;
+    range?: number;  // フィールド効果の場合の範囲
   };
 
 export type Card = {
-  id: string;
-  type: CardType;
-  name: string;
-  points: number;
-  effect?: CardEffect;
-};
+    id: string;
+    type: CardType;
+    category: CardCategory;
+    name: string;
+    points: number;
+    effect?: CardEffect;
+    turn: number;  // どのターンのカードかを示す
+  };
 
 export type Position = {
   row: number;

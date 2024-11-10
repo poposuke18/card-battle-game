@@ -156,28 +156,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'UNDO_LAST_MOVE': {
       const currentTurn = state.status.turn;
       const cardsToReturn: Card[] = [];
-      const placedCards: PlacedCard[] = [];
       
-      // まず、配置されているカードを集める
-      state.board.forEach((row, rowIndex) => {
-        row.forEach((cell, colIndex) => {
-          if (cell) {
-            placedCards.push(cell);
-          }
-        });
-      });
-    
-      // 現在のターンのカードだけを取り出す（IDの数値が大きいものが新しいカード）
-      const currentTurnCards = placedCards
-        .sort((a, b) => parseInt(b.card.id) - parseInt(a.card.id))
-        .slice(0, currentTurn === 1 ? 4 : currentTurn === 2 ? 4 : 2);
-    
-      const currentTurnCardIds = new Set(currentTurnCards.map(card => card.card.id));
-    
-      // ボードを更新
+      // 新しいボードを作成
       const newBoard = state.board.map(row => 
         row.map(cell => {
-          if (cell && currentTurnCardIds.has(cell.card.id)) {
+          if (cell && cell.card.turn === currentTurn) {
+            // 現在のターンのカードのみを手札に戻す
             cardsToReturn.push(cell.card);
             return null;
           }
@@ -368,18 +352,15 @@ export default function Home() {
             />
             
             <div className="flex justify-between items-center mt-4">
-              <button
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 
-                         disabled:opacity-50 disabled:cursor-not-allowed transition-colors
-                         disabled:hover:bg-gray-700"
-                onClick={() => dispatch({ type: 'UNDO_LAST_MOVE' })}
-                disabled={gameState.currentHand.length === (
-                  gameState.status.turn === 1 ? 4 : 
-                  gameState.status.turn === 2 ? 4 : 2
-                )}
-              >
-                このターンをやり直す
-              </button>
+            <button
+          className={`px-4 py-2 bg-gray-700 text-white rounded-lg
+            ${gameState.currentHand.length === 0 ? 'hover:bg-gray-600' : 'opacity-50 cursor-not-allowed'}
+            transition-colors`}
+          onClick={() => dispatch({ type: 'UNDO_LAST_MOVE' })}
+          disabled={gameState.currentHand.length > 0}
+        >
+          このターンをやり直す
+        </button>
               
               {gameState.canEndTurn && !gameState.status.gameOver && (
                 <button

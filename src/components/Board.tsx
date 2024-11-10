@@ -43,30 +43,131 @@ function CardDetails({ card, board, position }: CardDetailsProps) {
     );
   }
 
+// Board.tsx の EffectHighlight コンポーネントを更新
+
 function EffectHighlight({ position, board }: { position: Position; board: (PlacedCard | null)[][] }) {
-        const cell = board[position.row][position.col];
-        if (!cell?.card.effect) return null;
-      
-        const affectedCells = getAffectedPositions(position, cell.card, board);
-      
-        return (
-          <>
-            {affectedCells.map((pos) => (
-              <motion.div
-                key={`highlight-${pos.row}-${pos.col}`}
-                initial={{ opacity: 0 }}
-                animate={[
-                  { opacity: 0.6, scale: 1.1 },
-                  { opacity: 0 }
-                ]}
-                transition={{ duration: 0.5 }}
-                className={`absolute top-0 left-0 w-full h-full rounded-lg
-                  ${cell.card.type === 'ally' ? 'bg-blue-400/30' : 'bg-red-400/30'}`}
-              />
-            ))}
-          </>
-        );
+    const cell = board[position.row][position.col];
+    if (!cell?.card.effect) return null;
+  
+    // ハイライトの色とスタイルを決定する関数
+    const getHighlightStyle = (card: Card) => {
+      const baseStyle = "absolute top-0 left-0 w-full h-full rounded-lg";
+      if (card.type === 'ally') {
+        return `${baseStyle} ${
+          card.effect?.type.includes('DEBUFF') ? 'bg-red-400/30' : 'bg-blue-400/30'
+        }`;
+      } else {
+        return `${baseStyle} ${
+          card.effect?.type.includes('DEBUFF') ? 'bg-red-400/30' : 'bg-purple-400/30'
+        }`;
       }
+    };
+  
+    // 影響を受ける範囲を計算
+    const calculateAffectedPositions = (card: Card, position: Position): Position[] => {
+      const affected: Position[] = [];
+      
+      switch (card.effect?.type) {
+        case 'SELF_POWER_UP_BY_ENEMY_LINE':
+        case 'SELF_POWER_UP_BY_ADJACENT_ALLY':
+          // 自己強化効果の場合は自分のマスのみハイライト
+          affected.push(position);
+          break;
+  
+        case 'ADJACENT_UNIT_BUFF':
+        case 'ADJACENT_UNIT_DEBUFF': {
+          // 隣接効果の場合、対象となるユニットのマスをハイライト
+          const adjacentPositions = [
+            { row: position.row - 1, col: position.col },
+            { row: position.row + 1, col: position.col },
+            { row: position.row, col: position.col - 1 },
+            { row: position.row, col: position.col + 1 },
+          ];
+  
+          adjacentPositions.forEach(pos => {
+            if (pos.row >= 0 && pos.row < board.length &&
+                pos.col >= 0 && pos.col < board[0].length) {
+              const targetCard = board[pos.row][pos.col];
+              if (targetCard && targetCard.card.category === 'unit') {
+                // バフの場合は味方ユニットのみ、デバフは全ユニット
+                if (card.effect?.type === 'ADJACENT_UNIT_BUFF') {
+                  if (targetCard.card.type === card.type) {
+                    affected.push(pos);
+                  }
+                } else {
+                  affected.push(pos);
+                }
+              }
+            }
+          });
+          break;
+        }
+  
+        case 'FIELD_UNIT_BUFF':
+        case 'FIELD_UNIT_DEBUFF': {
+          // フィールド効果の場合、範囲内のユニットをハイライト
+          const range = card.effect?.range || 1;
+          for (let i = Math.max(0, position.row - range); 
+               i <= Math.min(board.length - 1, position.row + range); 
+               i++) {
+            for (let j = Math.max(0, position.col - range);
+                 j <= Math.min(board[0].length - 1, position.col + range);
+                 j++) {
+              if (i === position.row && j === position.col) continue;
+              
+              const targetCard = board[i][j];
+              if (targetCard && targetCard.card.category === 'unit') {
+                const distance = Math.abs(position.row - i) + Math.abs(position.col - j);
+                if (distance <= range) {
+                  // バフの場合は味方ユニットのみ、デバフは全ユニット
+                  if (card.effect?.type === 'FIELD_UNIT_BUFF') {
+                    if (targetCard.card.type === card.type) {
+                      affected.push({ row: i, col: j });
+                    }
+                  } else {
+                    affected.push({ row: i, col: j });
+                  }
+                }
+              }
+            }
+          }
+          break;
+        }
+      }
+      
+      return affected;
+    };
+  
+    const affectedPositions = calculateAffectedPositions(cell.card, position);
+  
+    return (
+      <>
+        {/* 自己効果の場合は自分のマスをハイライト */}
+        {cell.card.effect.type.startsWith('SELF_') && (
+          <motion.div
+            className={getHighlightStyle(cell.card)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        )}
+        
+        {/* 対象マスのハイライト */}
+        {affectedPositions.map((pos) => (
+          <motion.div
+            key={`highlight-${pos.row}-${pos.col}`}
+            initial={{ opacity: 0 }}
+            animate={[
+              { opacity: 0.6, scale: 1.1 },
+              { opacity: 0 }
+            ]}
+            transition={{ duration: 0.5 }}
+            className={getHighlightStyle(cell.card)}
+          />
+        ))}
+      </>
+    );
+  }
 
 export default function Board({ board, selectedCard, onPlaceCard }: BoardProps) {
         const [hoveredPosition, setHoveredPosition] = useState<Position | null>(null);
