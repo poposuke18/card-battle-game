@@ -5,6 +5,7 @@ export type CardEffect = {
   type: 'BUFF_ADJACENT' | 'DAMAGE_ADJACENT' | 'RANGE_EFFECT';
   power: number;
   range?: number;
+  condition?: number;  // POWER_UP_BY_ENEMY_LINE で使用
 };
 
 export type Card = {
@@ -48,4 +49,5 @@ export type GameAction =
   | { type: 'UNDO_LAST_MOVE' }
   | { type: 'END_TURN' }
   | { type: 'START_GAME' }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  | { type: 'INITIALIZE_GAME'; payload: { currentHand: Card[]; nextHand: Card[] } };  // 新しいアクションを追加

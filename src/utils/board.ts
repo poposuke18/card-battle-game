@@ -4,20 +4,20 @@ import { Position, PlacedCard } from '@/types/game';
 
 // 隣接マスの位置を取得する関数
 export function getAdjacentPositions(position: Position, boardSize: number = 5): Position[] {
-  const { row, col } = position;
-  const adjacent: Position[] = [];
-
-  // 上
-  if (row > 0) adjacent.push({ row: row - 1, col });
-  // 下
-  if (row < boardSize - 1) adjacent.push({ row: row + 1, col });
-  // 左
-  if (col > 0) adjacent.push({ row, col: col - 1 });
-  // 右
-  if (col < boardSize - 1) adjacent.push({ row, col: col + 1 });
-
-  return adjacent;
-}
+    const { row, col } = position;
+    const adjacent: Position[] = [];
+  
+    // 上
+    if (row > 0) adjacent.push({ row: row - 1, col });
+    // 下
+    if (row < boardSize - 1) adjacent.push({ row: row + 1, col });
+    // 左
+    if (col > 0) adjacent.push({ row, col: col - 1 });
+    // 右
+    if (col < boardSize - 1) adjacent.push({ row, col: col + 1 });
+  
+    return adjacent;
+  }
 
 // 指定位置の周囲のカードを取得する関数
 export function getAdjacentCards(
@@ -63,3 +63,55 @@ export function hasAdjacentCardOfType(
   const adjacentCards = getAdjacentCards(position, board);
   return adjacentCards.some(card => card.card.type === type);
 }
+
+export function checkEnemyLine(position: Position, board: (PlacedCard | null)[][]): boolean {
+    const { row, col } = position;
+    
+    // 横方向の確認（左右）
+    if (col > 1) {
+      // 左側に2つ
+      if (board[row][col-1]?.card.type === 'enemy' && 
+          board[row][col-2]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+    if (col < board[0].length - 2) {
+      // 右側に2つ
+      if (board[row][col+1]?.card.type === 'enemy' && 
+          board[row][col+2]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+    if (col > 0 && col < board[0].length - 1) {
+      // 左右に1つずつ
+      if (board[row][col-1]?.card.type === 'enemy' && 
+          board[row][col+1]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+  
+    // 縦方向の確認（上下）
+    if (row > 1) {
+      // 上に2つ
+      if (board[row-1]?.[col]?.card.type === 'enemy' && 
+          board[row-2]?.[col]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+    if (row < board.length - 2) {
+      // 下に2つ
+      if (board[row+1]?.[col]?.card.type === 'enemy' && 
+          board[row+2]?.[col]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+    if (row > 0 && row < board.length - 1) {
+      // 上下に1つずつ
+      if (board[row-1]?.[col]?.card.type === 'enemy' && 
+          board[row+1]?.[col]?.card.type === 'enemy') {
+        return true;
+      }
+    }
+  
+    return false;
+  }
