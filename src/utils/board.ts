@@ -115,3 +115,84 @@ export function checkEnemyLine(position: Position, board: (PlacedCard | null)[][
   
     return false;
   }
+
+export function getAffectedPositions(
+    position: Position,
+    card: Card,
+    board: (PlacedCard | null)[][]
+  ): Position[] {
+    const affected: Position[] = [];
+    
+    if (!card.effect) return affected;
+  
+    switch (card.effect.type) {
+      case 'POWER_UP_BY_ENEMY_LINE': {
+        // 横方向のチェック
+        if (position.col > 1) {
+          const left1 = board[position.row][position.col-1];
+          const left2 = board[position.row][position.col-2];
+          if (left1?.card.type === 'enemy' && left2?.card.type === 'enemy') {
+            affected.push({ row: position.row, col: position.col-1 });
+            affected.push({ row: position.row, col: position.col-2 });
+          }
+        }
+        if (position.col < board[0].length - 2) {
+          const right1 = board[position.row][position.col+1];
+          const right2 = board[position.row][position.col+2];
+          if (right1?.card.type === 'enemy' && right2?.card.type === 'enemy') {
+            affected.push({ row: position.row, col: position.col+1 });
+            affected.push({ row: position.row, col: position.col+2 });
+          }
+        }
+        
+        // 縦方向のチェック
+        if (position.row > 1) {
+          const up1 = board[position.row-1][position.col];
+          const up2 = board[position.row-2][position.col];
+          if (up1?.card.type === 'enemy' && up2?.card.type === 'enemy') {
+            affected.push({ row: position.row-1, col: position.col });
+            affected.push({ row: position.row-2, col: position.col });
+          }
+        }
+        if (position.row < board.length - 2) {
+          const down1 = board[position.row+1][position.col];
+          const down2 = board[position.row+2][position.col];
+          if (down1?.card.type === 'enemy' && down2?.card.type === 'enemy') {
+            affected.push({ row: position.row+1, col: position.col });
+            affected.push({ row: position.row+2, col: position.col });
+          }
+        }
+        break;
+      }
+      
+      case 'BUFF_ADJACENT':
+      case 'DAMAGE_ADJACENT': {
+        const adjacentCards = getAdjacentCards(position, board);
+        adjacentCards.forEach(adjCard => {
+          if (card.effect?.type === 'BUFF_ADJACENT' && adjCard.card.type === card.type) {
+            affected.push(adjCard.position);
+          } else if (card.effect?.type === 'DAMAGE_ADJACENT') {
+            affected.push(adjCard.position);
+          }
+        });
+        break;
+      }
+  
+      case 'RANGE_BUFF':
+      case 'FIELD_BUFF': {
+        const range = card.effect.range || 1;
+        for (let i = 0; i < board.length; i++) {
+          for (let j = 0; j < board[i].length; j++) {
+            const distance = Math.abs(position.row - i) + Math.abs(position.col - j);
+            const targetCell = board[i][j];
+            if (distance <= range && distance > 0 && targetCell && targetCell.card.type === card.type) {
+              affected.push({ row: i, col: j });
+            }
+          }
+        }
+        break;
+      }
+    }
+    
+    return affected;
+  }

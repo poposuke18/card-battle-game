@@ -1,14 +1,14 @@
 'use client';
 
-
 import { useState, useReducer, useEffect } from 'react';
 import Board from '@/components/Board';
-import Card from '@/components/Card';
 import GameStatus from '@/components/GameStatus';
+import AnimatedCard from '@/components/AnimatedCard';
+import TurnTransition from '@/components/TurnTransition';
 import { GameState, GameAction, Card as CardType, Position, PlacedCard } from '@/types/game';
-import { getAdjacentCards, getPositionsInRange } from '@/utils/board';
+import { getAdjacentCards, getPositionsInRange, checkEnemyLine } from '@/utils/board';
 import { generateRandomHand, generateNextHand } from '@/utils/cards';
-import { TURN1_CARDS, TURN2_CARDS } from '@/constants/cards';
+import { TURN1_CARDS, TURN2_CARDS, TURN3_CARDS } from '@/constants/cards';
 
 // 初期状態を空の手札で作成
 const initialState: GameState = {
@@ -39,21 +39,16 @@ function calculateScores(board: (PlacedCard | null)[][]): { allyScore: number; e
       const position = { row, col };
       const adjacentCards = getAdjacentCards(position, board);
 
-      // 特殊効果の処理
+      // カードの効果を適用
       if (cell.card.effect) {
         switch (cell.card.effect.type) {
-          case 'POWER_UP_BY_ENEMY': {
-            // 槍兵の効果: 隣接する敵ユニットが3体以上で攻撃力2倍
-            const adjacentEnemies = adjacentCards.filter(
-              adj => adj.card.type !== cell.card.type
-            ).length;
-            if (adjacentEnemies >= cell.card.effect.condition) {
+          case 'POWER_UP_BY_ENEMY_LINE': {
+            if (checkEnemyLine(position, board)) {
               points += cell.card.effect.power;
             }
             break;
           }
           case 'POWER_UP_BY_ALLY': {
-            // 剣士の効果: 隣接する味方ユニット1体につき攻撃力上昇
             const adjacentAllies = adjacentCards.filter(
               adj => adj.card.type === cell.card.type
             ).length;
@@ -61,7 +56,6 @@ function calculateScores(board: (PlacedCard | null)[][]): { allyScore: number; e
             break;
           }
           case 'BUFF_ADJACENT': {
-            // 既存の隣接バフ効果
             const targets = adjacentCards.filter(
               adj => adj.card.type === cell.card.type
             );
@@ -69,12 +63,36 @@ function calculateScores(board: (PlacedCard | null)[][]): { allyScore: number; e
             break;
           }
           case 'DAMAGE_ADJACENT': {
-            // 既存の隣接デバフ効果
-            const targets = adjacentCards.filter(
-              adj => adj.card.type !== cell.card.type
-            );
-            points += targets.length * cell.card.effect.power;
+            points += adjacentCards.length * -cell.card.effect.power;
             break;
+          }
+          case 'RANGE_BUFF':
+          case 'FIELD_BUFF': {
+            // 範囲効果は他のカードのスコアに影響するため、ここでは基本点数のみ
+            break;
+          }
+        }
+      }
+
+      // 他のカードからの効果を受ける
+      for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+          const otherCell = board[i][j];
+          if (!otherCell || otherCell === cell) continue;
+
+          if (otherCell.card.effect) {
+            const distance = Math.abs(row - i) + Math.abs(col - j);
+            
+            switch (otherCell.card.effect.type) {
+              case 'RANGE_BUFF':
+              case 'FIELD_BUFF': {
+                if (distance <= (otherCell.card.effect.range || 1) && 
+                    otherCell.card.type === cell.card.type) {
+                  points += otherCell.card.effect.power;
+                }
+                break;
+              }
+            }
           }
         }
       }
@@ -136,18 +154,39 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'UNDO_LAST_MOVE': {
-      // 現在のターンに置かれたカードを全て手札に戻す
+      const currentTurn = state.status.turn;
       const cardsToReturn: Card[] = [];
+      const placedCards: PlacedCard[] = [];
+      
+      // まず、配置されているカードを集める
+      state.board.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          if (cell) {
+            placedCards.push(cell);
+          }
+        });
+      });
+    
+      // 現在のターンのカードだけを取り出す（IDの数値が大きいものが新しいカード）
+      const currentTurnCards = placedCards
+        .sort((a, b) => parseInt(b.card.id) - parseInt(a.card.id))
+        .slice(0, currentTurn === 1 ? 4 : currentTurn === 2 ? 4 : 2);
+    
+      const currentTurnCardIds = new Set(currentTurnCards.map(card => card.card.id));
+    
+      // ボードを更新
       const newBoard = state.board.map(row => 
         row.map(cell => {
-          if (cell) {
+          if (cell && currentTurnCardIds.has(cell.card.id)) {
             cardsToReturn.push(cell.card);
             return null;
           }
           return cell;
         })
       );
-
+    
+      const { allyScore, enemyScore } = calculateScores(newBoard);
+    
       return {
         ...state,
         board: newBoard,
@@ -155,34 +194,42 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         canEndTurn: false,
         status: {
           ...state.status,
-          allyScore: 0,
-          enemyScore: 0
+          allyScore,
+          enemyScore
         }
       };
     }
 
     case 'END_TURN': {
       if (!state.canEndTurn) return state;
-
+    
+      const nextTurn = state.status.turn + 1;
+      console.log(`Moving to turn ${nextTurn}`);
+      
+      // 次の次のターンの手札を生成（現在のターンから次のターンのカードを生成）
+      const nextHand = generateNextHand(nextTurn);
+      console.log('Next hand:', nextHand);
+    
       // 次のターンの状態を作成
       const nextState = {
         ...state,
         currentHand: state.nextHand,
-        nextHand: [],
+        nextHand,
         status: {
           ...state.status,
-          turn: state.status.turn + 1
+          turn: nextTurn
         },
         canEndTurn: false
       };
-
+    
       // 全てのマスが埋まっているか確認
       const isBoardFull = nextState.board.every(row => 
         row.every(cell => cell !== null)
       );
-
+    
       // ゲーム終了条件の確認
-      if (isBoardFull || nextState.status.turn > 2) {
+      if (isBoardFull || nextTurn > 3) {
+        console.log('Game over condition met');
         const { allyScore, enemyScore } = calculateScores(nextState.board);
         
         return {
@@ -196,7 +243,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           }
         };
       }
-
+    
       return nextState;
     }
 
@@ -204,12 +251,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...initialState,
         board: Array(5).fill(null).map(() => Array(5).fill(null)),
-        currentHand: generateRandomHand(),  // turn1Cardsの代わりにgenerateRandomHand()を使用
-        nextHand: generateNextHand(),       // turn2Cardsの代わりにgenerateNextHand()を使用
+        currentHand: generateRandomHand(),    // ターン1の基本ユニット
+        nextHand: generateNextHand(1),        // 現在のターン1から次のターン2のカード
         status: {
-          ...initialState.status
+          ...initialState.status,
+          turn: 1,
+          allyScore: 0,
+          enemyScore: 0,
+          gameOver: false,
+          winner: null
         }
       };
+
 
     default:
       return state;
@@ -219,11 +272,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 export default function Home() {
   const [gameState, dispatch] = useReducer(gameReducer, initialState);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showTurnTransition, setShowTurnTransition] = useState(false);
 
-useEffect(() => {
+  const handleEndTurn = () => {
+    setShowTurnTransition(true);
+    setTimeout(() => {
+      dispatch({ type: 'END_TURN' });
+      setTimeout(() => {
+        setShowTurnTransition(false);
+      }, 1000);
+    }, 500);
+  };
+
+  useEffect(() => {
     if (!isInitialized) {
-      const initialHand = generateRandomHand();
-      const nextHand = generateNextHand();
+      const initialHand = generateRandomHand();    // ターン1の基本ユニット
+      const nextHand = generateNextHand(1);        // 現在のターン1から次のターン2のカード
       
       dispatch({ 
         type: 'INITIALIZE_GAME', 
@@ -254,63 +318,91 @@ useEffect(() => {
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-100">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">Card Battle Game</h1>
-        <GameStatus status={gameState.status} />
-        <Board
-          board={gameState.board}
-          selectedCard={gameState.selectedCard}
-          onPlaceCard={(position) => {
-            if (gameState.selectedCard && gameState.board[position.row][position.col] === null) {
-              dispatch({ type: 'PLACE_CARD', position });
-            }
-          }}
-        />
-        
-        <div className="flex justify-between items-center mt-4 mb-8">
-          <button
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50"
-            onClick={() => dispatch({ type: 'UNDO_LAST_MOVE' })}
-            disabled={gameState.currentHand.length === (gameState.status.turn === 1 ? TURN1_CARDS.length : TURN2_CARDS.length)}
-          >
-            このターンをやり直す
-          </button>
-          
-          {gameState.canEndTurn && !gameState.status.gameOver && (
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              onClick={() => dispatch({ type: 'END_TURN' })}
-            >
-              次のターンへ
-            </button>
-          )}
-
-          {gameState.status.gameOver && (
-            <button
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              onClick={() => dispatch({ type: 'RESET_GAME' })}
-            >
-              もう一度プレイ
-            </button>
-          )}
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100">
+      <TurnTransition 
+        turn={gameState.status.turn + 1} 
+        isVisible={showTurnTransition} 
+      />
+      
+      <div className="max-w-5xl mx-auto p-4">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-red-400 mb-2">
+            Card Battle Game
+          </h1>
+          <p className="text-gray-400">戦略的に配置して勝利を目指そう！</p>
         </div>
-
-        {!gameState.status.gameOver && (
-          <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">手札</h2>
-            <div className="flex gap-4 flex-wrap">
-              {gameState.currentHand.map((card) => (
-                <Card 
-                  key={card.id} 
-                  card={card}
-                  isSelected={gameState.selectedCard?.id === card.id}
-                  onClick={() => dispatch({ type: 'SELECT_CARD', card })}
-                />
-              ))}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左側: 手札 */}
+          <div className="lg:col-span-1">
+            {!gameState.status.gameOver && (
+              <div className="bg-gray-800/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+                <h2 className="text-xl font-bold mb-4 text-gray-300">手札</h2>
+                <div className="flex flex-row flex-wrap gap-2 justify-center">
+                  {gameState.currentHand.map((card, index) => (
+                    <AnimatedCard
+                      key={card.id}
+                      card={card}
+                      isSelected={gameState.selectedCard?.id === card.id}
+                      onClick={() => dispatch({ type: 'SELECT_CARD', card })}
+                      index={index}
+                      isNew={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+  
+          {/* 中央: ゲームボード */}
+          <div className="lg:col-span-2">
+            <GameStatus status={gameState.status} />
+            <Board
+              board={gameState.board}
+              selectedCard={gameState.selectedCard}
+              onPlaceCard={(position) => {
+                if (gameState.selectedCard && gameState.board[position.row][position.col] === null) {
+                  dispatch({ type: 'PLACE_CARD', position });
+                }
+              }}
+            />
+            
+            <div className="flex justify-between items-center mt-4">
+              <button
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 
+                         disabled:opacity-50 disabled:cursor-not-allowed transition-colors
+                         disabled:hover:bg-gray-700"
+                onClick={() => dispatch({ type: 'UNDO_LAST_MOVE' })}
+                disabled={gameState.currentHand.length === (
+                  gameState.status.turn === 1 ? 4 : 
+                  gameState.status.turn === 2 ? 4 : 2
+                )}
+              >
+                このターンをやり直す
+              </button>
+              
+              {gameState.canEndTurn && !gameState.status.gameOver && (
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 
+                           transition-colors shadow-lg hover:shadow-xl"
+                  onClick={handleEndTurn}
+                >
+                  次のターンへ
+                </button>
+              )}
+  
+              {gameState.status.gameOver && (
+                <button
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 
+                           transition-colors shadow-lg hover:shadow-xl"
+                  onClick={() => dispatch({ type: 'RESET_GAME' })}
+                >
+                  もう一度プレイ
+                </button>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </main>
   );

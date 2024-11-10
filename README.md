@@ -2,6 +2,13 @@
 
 シンプルなカードバトルゲームです。5x5のフィールドに味方と敵のカードを配置して戦います。
 
+## 技術スタック
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+
 ## ゲーム概要
 
 ### 基本ルール
@@ -55,7 +62,58 @@
 3. 配置をやり直したい場合は「このターンをやり直す」ボタンを押します
 4. 全てのカードを配置すると「次のターンへ」ボタンが表示されます
 
-## 開発環境
+## プロジェクト構成
+
+```
+src/
+  ├── app/                    # Next.js アプリケーションのメインディレクトリ
+  │   ├── fonts/             # フォントファイル
+  │   ├── favicon.ico        # ファビコン
+  │   ├── globals.css        # グローバルスタイル
+  │   ├── layout.tsx         # レイアウトコンポーネント
+  │   └── page.tsx           # メインページコンポーネント
+  │
+  ├── components/            # 再利用可能なコンポーネント
+  │   ├── score/            # スコア関連のコンポーネント
+  │   │   ├── AnimatedScore.tsx  # スコアアニメーション
+  │   │   ├── index.ts          # エクスポート定義
+  │   │   └── ScorePopup.tsx    # スコア詳細ポップアップ
+  │   ├── AnimatedCard.tsx   # カードアニメーションコンポーネント
+  │   ├── Board.tsx          # ゲームボードコンポーネント
+  │   ├── GameStatus.tsx     # ゲーム状態表示コンポーネント
+  │   └── TurnTransition.tsx # ターン遷移アニメーション
+  │
+  ├── constants/            # 定数定義
+  │   └── cards.ts         # カード定義
+  │
+  ├── types/               # 型定義
+  │   └── game.ts         # ゲーム関連の型定義
+  │
+  └── utils/              # ユーティリティ関数
+      ├── board.ts        # ボード操作関連
+      ├── cards.ts        # カード操作関連
+      └── score-calculator.ts # スコア計算関連
+```
+
+## 主要なファイルの説明
+
+### コンポーネント
+- `Board.tsx`: メインのゲームボードを表示・制御
+- `AnimatedCard.tsx`: カードのアニメーション付き表示
+- `GameStatus.tsx`: 現在のスコアとゲーム状態を表示
+- `TurnTransition.tsx`: ターン切り替え時のアニメーション
+- `score/`: スコア関連の表示コンポーネント
+
+### ユーティリティ
+- `board.ts`: ボードの状態管理とカード効果の計算
+- `cards.ts`: カードの生成とシャッフルロジック
+- `score-calculator.ts`: スコア計算ロジック
+
+### 定数と型定義
+- `constants/cards.ts`: 全カードの定義データ
+- `types/game.ts`: ゲーム全体で使用する型定義
+
+## 開発環境のセットアップ
 
 ```bash
 # リポジトリのクローン
@@ -67,20 +125,6 @@ npm install
 # 開発サーバーの起動
 npm run dev
 ```
-
-## 技術スタック
-
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-
-## 主要な実装ファイル
-- `src/constants/cards.ts`: カードの定義
-- `src/utils/board.ts`: ボードの操作とカードの効果計算
-- `src/utils/cards.ts`: カードの生成とシャッフル
-- `src/components/Board.tsx`: ゲームボードのUI
-- `src/components/Card.tsx`: カードのUI
-- `src/components/GameStatus.tsx`: ゲーム状態の表示
 
 ## 今後の実装予定
 

@@ -2,11 +2,10 @@
 export type CardType = 'ally' | 'enemy';
 
 export type CardEffect = {
-  type: 'BUFF_ADJACENT' | 'DAMAGE_ADJACENT' | 'RANGE_EFFECT';
-  power: number;
-  range?: number;
-  condition?: number;  // POWER_UP_BY_ENEMY_LINE で使用
-};
+    type: 'BUFF_ADJACENT' | 'DAMAGE_ADJACENT' | 'POWER_UP_BY_ENEMY_LINE' | 'POWER_UP_BY_ALLY' | 'RANGE_BUFF' | 'FIELD_BUFF';
+    power: number;
+    range?: number;
+  };
 
 export type Card = {
   id: string;
