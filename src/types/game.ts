@@ -1,12 +1,18 @@
+// src/types/game.ts
 export type CardType = 'ally' | 'enemy';
+
+export type CardEffect = {
+  type: 'BUFF_ADJACENT' | 'DAMAGE_ADJACENT' | 'RANGE_EFFECT';
+  power: number;
+  range?: number;
+};
 
 export type Card = {
   id: string;
   type: CardType;
   name: string;
   points: number;
-  effect?: string;
-  image?: string;
+  effect?: CardEffect;
 };
 
 export type Position = {
@@ -29,16 +35,17 @@ export type GameStatus = {
 
 export type GameState = {
   board: (PlacedCard | null)[][];
-  hand: Card[];
-  selectedCard: Card | null;  // この行を追加
+  currentHand: Card[];  // 現在のターンの手札
+  nextHand: Card[];     // 次のターンの手札
+  selectedCard: Card | null;
   status: GameStatus;
+  canEndTurn: boolean;  // ターン終了可能かどうか
 };
 
-// ゲームアクション用の型
 export type GameAction = 
-| { type: 'SELECT_CARD'; card: Card }  // この行を追加
-
-  | { type: 'PLACE_CARD'; card: Card; position: Position }
+  | { type: 'SELECT_CARD'; card: Card }
+  | { type: 'PLACE_CARD'; position: Position }
+  | { type: 'UNDO_LAST_MOVE' }
   | { type: 'END_TURN' }
   | { type: 'START_GAME' }
   | { type: 'RESET_GAME' };
