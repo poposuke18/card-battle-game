@@ -1,52 +1,43 @@
-# .github/workflows/nextjs-deploy.yml
 name: Deploy Next.js site to Pages
 
 on:
-  # メインブランチにプッシュした時に実行
   push:
     branches: ["main"]
-  # 手動でも実行可能
   workflow_dispatch:
 
-# GITHUBTOKENに必要な権限設定
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 1つのデプロイメントのみを許可
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  # ビルドジョブ
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: npm
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-        with:
-          static_site_generator: next
+          cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Build with Next.js
         run: npm run build
-      - name: Static HTML export with Next.js
-        run: npm run export
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
-  # デプロイジョブ
   deploy:
     environment:
       name: github-pages
@@ -56,4 +47,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
