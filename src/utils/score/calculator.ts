@@ -25,7 +25,7 @@ export function getEffectDescription(card: Card): string {
 
   switch (card.effect.type) {
     case 'SELF_POWER_UP_BY_ENEMY_LINE':
-      return `縦か横に敵ユニットが2体並んでいる場合、攻撃力+${card.effect.power}`;
+      return `横に敵ユニットが2体並んでいる場合、攻撃力+${card.effect.power}`;  // 説明文を修正
     case 'SELF_POWER_UP_BY_ADJACENT_ALLY':
       return `隣接する味方ユニット1体につき攻撃力+${card.effect.power}`;
     case 'ADJACENT_UNIT_BUFF':
@@ -45,8 +45,8 @@ export function getEffectDescription(card: Card): string {
       return '';
     case 'ROW_COLUMN_BUFF':
       return `${card.effect.targetDirection === 'vertical' ? '縦' : '横'}一列の味方ユニットの攻撃力+${card.effect.power}`;
-    case 'WEAPON_ENHANCEMENT':
-      return `周囲${card.effect.range}マス以内の味方武器カードの効果+${card.effect.pointsBonus}`;
+      case 'WEAPON_ENHANCEMENT':
+        return `周囲${card.effect.range}マス以内の味方武器カードの効果を2倍にする`;
     default:
       return '';
   }

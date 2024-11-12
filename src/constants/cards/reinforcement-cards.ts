@@ -8,8 +8,8 @@ export const TURN5_CARDS: Card[] = [
     id: '25',
     type: 'ally',
     category: 'unit',
-    name: '竜騎士隊長',
-    points: 120,
+    name: '指揮官',
+    points: 50,
     class: 'knight',
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
@@ -26,7 +26,7 @@ export const TURN5_CARDS: Card[] = [
     id: '26',
     type: 'ally',
     category: 'unit',
-    name: '魔導師長',
+    name: '魔導師',
     points: 110,
     class: 'mage',
     effect: {
@@ -75,9 +75,9 @@ export const TURN5_CARDS: Card[] = [
     class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',
-      pointsBonus: 30,
-      powerBonus: 20,
-      range: 1
+      range: 1,
+      // pointsBonusとpowerBonusを削除し、新しい効果を追加
+      effectMultiplier: 2  // 武器カードの効果を2倍にする
     },
     turn: 5
   },
@@ -87,8 +87,8 @@ export const TURN5_CARDS: Card[] = [
     id: '30',
     type: 'enemy',
     category: 'unit',
-    name: '混沌の将軍',
-    points: 140,
+    name: '闇の指揮官',
+    points: 90,
     class: 'knight',
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
@@ -141,9 +141,8 @@ export const TURN5_CARDS: Card[] = [
     class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',
-      pointsBonus: 35,
-      powerBonus: 25,
-      range: 1
+      range: 1,
+      effectMultiplier: 2  // 武器カードの効果を2倍にする
     },
     turn: 5
   }

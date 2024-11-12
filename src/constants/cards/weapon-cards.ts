@@ -29,6 +29,19 @@ export const TURN4_CARDS: Card[] = [
       turn: 4
     },
     {
+      id: '25',
+      type: 'ally',
+      category: 'weapon',
+      name: '聖騎士の大盾',
+      points: 35,
+      effect: {
+        type: 'CROSS_FORMATION',
+        targetClass: 'guardian',
+        power: 45
+      },
+      turn: 4
+    },
+    {
       id: '19',
       type: 'ally',
       category: 'weapon',
@@ -65,6 +78,19 @@ export const TURN4_CARDS: Card[] = [
         type: 'VERTICAL_BOOST',
         targetClass: 'warrior',
         power: 65
+      },
+      turn: 4
+    },
+    {
+      id: '26',
+      type: 'enemy',
+      category: 'weapon',
+      name: '魔族の鋼鉄盾',
+      points: 40,
+      effect: {
+        type: 'CROSS_FORMATION',
+        targetClass: 'guardian',
+        power: 50
       },
       turn: 4
     },

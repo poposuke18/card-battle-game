@@ -32,7 +32,7 @@ export const TURN2_CARDS: Card[] = [
       id: '9',
       type: 'ally',
       category: 'unit',
-      name: '盾兵',
+      name: '重装盾兵',
       class: 'warrior',
       points: 90,
       effect: {

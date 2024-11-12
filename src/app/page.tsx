@@ -3,6 +3,7 @@
 
 import { useState, useReducer, useEffect } from 'react';
 import { Board } from '@/components/board';
+import { CardDetailOverlay } from '@/components/CardDetailOverlay';
 import GameStatus from '@/components/GameStatus';
 import AnimatedCard from '@/components/AnimatedCard';
 import TurnTransition from '@/components/TurnTransition';
@@ -211,7 +212,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 export default function Home() {
   const [gameState, dispatch] = useReducer(gameReducer, initialState);
   const [isInitialized, setIsInitialized] = useState(false);
+
   const [showTurnTransition, setShowTurnTransition] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<{
+    card: PlacedCard;
+    position: Position;
+  } | null>(null);
 
   const handleEndTurn = () => {
     dispatch({ type: 'END_TURN' });
@@ -252,6 +258,11 @@ export default function Home() {
         turn={gameState.status.turn} 
         isVisible={showTurnTransition} 
       />
+
+<CardDetailOverlay
+        hoveredCard={hoveredCard}
+        board={gameState.board}
+      />
       
       <div className="max-w-5xl mx-auto p-4">
         <div className="text-center mb-6">
@@ -285,7 +296,7 @@ export default function Home() {
 
           {/* ゲームボードエリア */}
           <div className="lg:col-span-2">
-            <GameStatus status={gameState.status} />
+          <GameStatus status={gameState.status} />
             <Board
               board={gameState.board}
               selectedCard={gameState.selectedCard}
@@ -294,6 +305,7 @@ export default function Home() {
                   dispatch({ type: 'PLACE_CARD', position });
                 }
               }}
+              onHoverCard={setHoveredCard}
             />
             
             {/* アクションボタン */}

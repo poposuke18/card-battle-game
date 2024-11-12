@@ -31,50 +31,44 @@ export function checkEnemyLine(
   const { row, col } = position;
   
   const isEnemyUnit = (cell: PlacedCard | null): boolean => {
-    return cell?.card.type === 'enemy' && cell.card.category === 'unit';
+    if (!cell) return false;
+    const isEnemy = cell.card.type === 'enemy' && cell.card.category === 'unit';
+    
+    // デバッグ出力
+    console.log('Enemy check:', {
+      cell: cell.card.name,
+      type: cell.card.type,
+      category: cell.card.category,
+      isEnemy
+    });
+    
+    return isEnemy;
   };
 
   // 横方向のチェック
   if (direction === 'horizontal' || direction === 'both') {
-    // 左右に2体の敵ユニットがいるかチェック
+    console.log('Checking horizontal:', {
+      position,
+      left: col > 0 ? board[row][col - 1]?.card.name : 'none',
+      right: col < board[0].length - 1 ? board[row][col + 1]?.card.name : 'none'
+    });
+
+    // 左右に敵ユニットがいるかチェック
     if (col > 0 && col < board[0].length - 1) {
-      if (isEnemyUnit(board[row][col - 1]) && isEnemyUnit(board[row][col + 1])) {
-        return true;
-      }
+      const hasEnemyLine = isEnemyUnit(board[row][col - 1]) && isEnemyUnit(board[row][col + 1]);
+      if (hasEnemyLine) return true;
     }
+
     // 左側に2体
     if (col >= 2) {
-      if (isEnemyUnit(board[row][col - 1]) && isEnemyUnit(board[row][col - 2])) {
-        return true;
-      }
+      const hasLeftLine = isEnemyUnit(board[row][col - 1]) && isEnemyUnit(board[row][col - 2]);
+      if (hasLeftLine) return true;
     }
+
     // 右側に2体
     if (col <= board[0].length - 3) {
-      if (isEnemyUnit(board[row][col + 1]) && isEnemyUnit(board[row][col + 2])) {
-        return true;
-      }
-    }
-  }
-
-  // 縦方向のチェック
-  if (direction === 'vertical' || direction === 'both') {
-    // 上下に2体の敵ユニットがいるかチェック
-    if (row > 0 && row < board.length - 1) {
-      if (isEnemyUnit(board[row - 1][col]) && isEnemyUnit(board[row + 1][col])) {
-        return true;
-      }
-    }
-    // 上側に2体
-    if (row >= 2) {
-      if (isEnemyUnit(board[row - 1][col]) && isEnemyUnit(board[row - 2][col])) {
-        return true;
-      }
-    }
-    // 下側に2体
-    if (row <= board.length - 3) {
-      if (isEnemyUnit(board[row + 1][col]) && isEnemyUnit(board[row + 2][col])) {
-        return true;
-      }
+      const hasRightLine = isEnemyUnit(board[row][col + 1]) && isEnemyUnit(board[row][col + 2]);
+      if (hasRightLine) return true;
     }
   }
 

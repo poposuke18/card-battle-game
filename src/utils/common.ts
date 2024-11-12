@@ -12,6 +12,7 @@ export function getClassDisplayName(unitClass: UnitClass): string {
     case 'mage': return '魔法使い';
     case 'knight': return '騎士';
     case 'lancer': return '槍兵';
+    case 'guardian': return '盾兵';  // 追加
     default: return '';
   }
 }
@@ -24,8 +25,9 @@ export function getClassIcon(unitClass: UnitClass): string {
     case 'warrior': return '⚔️';
     case 'archer': return '🏹';
     case 'mage': return '🔮';
-    case 'knight': return '🛡️';
+    case 'knight': return '🎠';
     case 'lancer': return '🔱';
+    case 'guardian': return '🛡️';  // 追加：盾兵用のアイコン
     default: return '';
   }
 }

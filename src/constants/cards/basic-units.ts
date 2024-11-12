@@ -12,6 +12,15 @@ export const TURN1_CARDS: Card[] = [
     turn: 1
   },
   { 
+    id: '27',
+    type: 'ally',
+    category: 'unit',
+    name: '盾兵',
+    points: 100,
+    class: 'guardian',
+    turn: 1
+  },
+  { 
     id: '2',
     type: 'ally',
     category: 'unit',
@@ -36,6 +45,15 @@ export const TURN1_CARDS: Card[] = [
     name: 'ゴブリン',
     points: 110,
     class: 'warrior',
+    turn: 1
+  },
+  {
+    id: '28',
+    type: 'enemy',
+    category: 'unit',
+    name: '闇の守護者',
+    points: 120,
+    class: 'guardian',
     turn: 1
   },
   {

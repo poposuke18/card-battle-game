@@ -13,6 +13,19 @@ export function calculateBaseEffect(
   const isSelfTarget = sourcePosition.row === targetPosition.row && 
                       sourcePosition.col === targetPosition.col;
 
+  // デバッグ用のログ出力
+  if (isSelfTarget && effect.type === 'SELF_POWER_UP_BY_ENEMY_LINE') {
+    console.log('槍兵効果チェック:', {
+      position: sourcePosition,
+      hasEnemyLine: checkEnemyLine(sourcePosition, board, 'horizontal'),
+      board: board.map(row => 
+        row.map(cell => 
+          cell ? `${cell.card.name}(${cell.card.type})` : null
+        )
+      )
+    });
+  }
+
   // 自己強化系の効果
   if (isSelfTarget) {
     switch (effect.type) {
@@ -20,15 +33,15 @@ export function calculateBaseEffect(
         // 横方向のみをチェックするように修正
         const hasEnemyLine = checkEnemyLine(sourcePosition, board, 'horizontal');
         if (hasEnemyLine) {
-          return effect.power;
+          return effect.power || 0;
         }
+        return 0;  // breakを削除し、明示的にreturnする
       }
-      break;
 
       case 'SELF_POWER_UP_BY_ADJACENT_ALLY': {
         const adjacentAllies = getAdjacentCards(sourcePosition, board)
           .filter(adj => adj.card.type === sourceCard.type && adj.card.category === 'unit');
-        return adjacentAllies.length * effect.power;
+        return adjacentAllies.length * (effect.power || 0);
       }
     }
   }

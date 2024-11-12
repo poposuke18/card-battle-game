@@ -23,8 +23,8 @@ export type BaseEffect = {
   targetDirection?: 'vertical' | 'horizontal';
   classEffects?: ClassEffect[];
   targetCategory?: CardCategory;
-  pointsBonus?: number;
-  powerBonus?: number;
+  // 新しいプロパティを追加
+  effectMultiplier?: number;  // 武器効果の倍率
 };
 
 export type WeaponEffectType =
