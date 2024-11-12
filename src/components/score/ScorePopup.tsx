@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
-import { ScoreDetails } from '@/utils/score-calculator';
+// src/components/score/ScorePopup.tsx
+
+import { ScoreDetails } from '@/utils/score/types';
 
 type ScorePopupProps = {
   scoreDetails: ScoreDetails;

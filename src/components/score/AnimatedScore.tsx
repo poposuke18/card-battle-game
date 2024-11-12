@@ -1,3 +1,5 @@
+// src/components/score/AnimatedScore.tsx
+
 import { motion } from 'framer-motion';
 
 type AnimatedScoreProps = {

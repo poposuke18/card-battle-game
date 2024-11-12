@@ -1,3 +1,5 @@
+// src/components/GameStatus.tsx
+
 import { GameStatus as GameStatusType } from '@/types/game';
 
 type GameStatusProps = {

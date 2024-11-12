@@ -1,11 +1,25 @@
 // src/utils/cards.ts
+import { 
+  TURN1_CARDS, 
+  TURN2_CARDS, 
+  TURN3_CARDS, 
+  TURN4_CARDS,
+  TURN5_CARDS
+} from '@/constants/cards';
+import type { Card, CardType } from '@/types';
 
-import { Card, CardType } from '@/types/game';
-import { TURN1_CARDS, TURN2_CARDS, TURN3_CARDS } from '@/constants/cards';
+// ターンごとのカード枚数設定
+const CARDS_PER_TURN = {
+  1: { ally: 3, enemy: 3 }, // 基本ユニット（3枚ずつに変更）
+  2: { ally: 2, enemy: 2 }, // 効果ユニット
+  3: { ally: 1, enemy: 1 }, // フィールドカード
+  4: { ally: 1, enemy: 1 }, // 武器カード
+  5: { ally: 2, enemy: 2 }  // 支援カード
+} as const;
 
-let cardIdCounter = 1000;
+export type TurnNumber = 1 | 2 | 3 | 4 | 5;
 
-// カードタイプでフィルタリングする共通関数を追加
+// カードタイプでフィルタリングする関数
 function filterCardsByType(cards: Card[], type: CardType): Card[] {
   return cards.filter(card => card.type === type);
 }
@@ -16,74 +30,58 @@ function pickRandomCards(cardPool: Card[], count: number): Card[] {
   const poolCopy = [...cardPool];
   
   for (let i = 0; i < count; i++) {
+    if (poolCopy.length === 0) break;
     const randomIndex = Math.floor(Math.random() * poolCopy.length);
     const randomCard = poolCopy.splice(randomIndex, 1)[0];
-    cards.push({
-      ...randomCard,
-      id: String(cardIdCounter++)
-    });
+    cards.push({ ...randomCard, id: `${randomCard.id}-${Date.now()}-${i}` });
   }
   return cards;
 }
 
-// ターンに応じたカードプールと枚数を取得する関数
-function getCardPoolAndCount(turn: number): {
-  cardPool: Card[],
-  allyCount: number,
-  enemyCount: number
-} {
-  switch(turn) {
-    case 1:
-      return {
-        cardPool: TURN1_CARDS,
-        allyCount: 2,
-        enemyCount: 2
-      };
-    case 2:
-      return {
-        cardPool: TURN2_CARDS,
-        allyCount: 2,
-        enemyCount: 2
-      };
-    case 3:
-      return {
-        cardPool: TURN3_CARDS,
-        allyCount: 1,
-        enemyCount: 1
-      };
-    default:
-      return {
-        cardPool: [],
-        allyCount: 0,
-        enemyCount: 0
-      };
+// ターンに応じたカードプールを取得
+function getTurnCards(turn: TurnNumber): Card[] {
+  switch (turn) {
+    case 1: return TURN1_CARDS;
+    case 2: return TURN2_CARDS;
+    case 3: return TURN3_CARDS;
+    case 4: return TURN4_CARDS;
+    case 5: return TURN5_CARDS;  // 追加
   }
 }
 
-// ターン1の手札生成（基本ユニット）
-export function generateRandomHand(): Card[] {
-  const { cardPool, allyCount, enemyCount } = getCardPoolAndCount(1);
-  const allyCards = filterCardsByType(cardPool, 'ally');
-  const enemyCards = filterCardsByType(cardPool, 'enemy');
+// 指定したターン用の手札を生成
+function generateHandForTurn(turn: TurnNumber): Card[] {
+  const turnCards = getTurnCards(turn);
+  const { ally: allyCount, enemy: enemyCount } = CARDS_PER_TURN[turn];
   
-  return [
+  const allyCards = filterCardsByType(turnCards, 'ally');
+  const enemyCards = filterCardsByType(turnCards, 'enemy');
+  
+  const generatedCards = [
     ...pickRandomCards(allyCards, allyCount),
     ...pickRandomCards(enemyCards, enemyCount)
-  ].sort(() => Math.random() - 0.5);
+  ].map(card => ({
+    ...card,
+    turn
+  }));
+
+  return generatedCards.sort(() => Math.random() - 0.5);
+}
+
+// 初期手札の生成（ターン1のカード）
+export function generateRandomHand(): Card[] {
+  return generateHandForTurn(1);
 }
 
 // 次のターンの手札生成
-export function generateNextHand(currentTurn: number): Card[] {
-  const nextTurn = currentTurn + 1;
-  const { cardPool, allyCount, enemyCount } = getCardPoolAndCount(nextTurn);
-  
-  if (cardPool.length === 0) return [];
-  
-  const allyCards = filterCardsByType(cardPool, 'ally');
-  const enemyCards = filterCardsByType(cardPool, 'enemy');
-  
-  return [
-    ...pickRandomCards(allyCards, allyCount),
-    ...pickRandomCards(enemyCards, enemyCount)
-  ].sort(() => Math.random() - 0.5);
+export function generateNextHand(currentTurn: TurnNumber): Card[] {
+  // 次のターンのカードを生成（5ターン目まで対応）
+  const nextTurn = (currentTurn + 1) as TurnNumber;
+  if (nextTurn > 5) return [];
+  return generateHandForTurn(nextTurn);
+}
+
+// 特定のターン用の手札を直接生成（初期化用）
+export function generateHandForSpecificTurn(turn: TurnNumber): Card[] {
+  return generateHandForTurn(turn);
 }
