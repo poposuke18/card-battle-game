@@ -34,6 +34,7 @@ export function CardDetails({ card, board, position }: CardDetailsProps) {
           {card.card.category === 'unit' && card.card.class && getClassIcon(card.card.class)}
           {card.card.category === 'weapon' && '⚔️'}
           {card.card.category === 'field' && '🏰'}
+          {card.card.category === 'support' && '📜'}
         </div>
       </div>
       
@@ -55,8 +56,8 @@ export function CardDetails({ card, board, position }: CardDetailsProps) {
       {card.card.effect && (
         <div className="mb-4">
           <div className="font-semibold text-yellow-400 mb-1">効果</div>
-          <div className="bg-gray-800/50 rounded-lg p-3 text-gray-300 leading-relaxed">
-            {getEffectDescription(card.card)}
+          <div className="bg-gray-800/50 rounded-lg p-3 text-gray-300">
+            {getEffectDescription(card.card, position, board)}
           </div>
         </div>
       )}

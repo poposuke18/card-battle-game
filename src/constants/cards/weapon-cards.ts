@@ -11,7 +11,7 @@ export const TURN4_CARDS: Card[] = [
         effect: {
           type: 'VERTICAL_BOOST',    // 上下の戦士のみに効果
           targetClass: 'warrior',
-          power: 60
+          power: 50
         },
         turn: 4
       },
@@ -24,7 +24,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'DIAGONAL_BOOST',
         targetClass: 'archer',
-        power: 50
+        power: 70
       },
       turn: 4
     },
@@ -37,7 +37,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'guardian',
-        power: 45
+        power: 40
       },
       turn: 4
     },
@@ -50,7 +50,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'mage',
-        power: 55
+        power: 50
       },
       turn: 4
     },
@@ -77,7 +77,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'VERTICAL_BOOST',
         targetClass: 'warrior',
-        power: 65
+        power: 60
       },
       turn: 4
     },
@@ -90,7 +90,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'guardian',
-        power: 50
+        power: 70
       },
       turn: 4
     },
@@ -103,7 +103,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'DIAGONAL_BOOST',
         targetClass: 'archer',
-        power: 55
+        power: 80
       },
       turn: 4
     },
@@ -129,7 +129,7 @@ export const TURN4_CARDS: Card[] = [
       effect: {
         type: 'HORIZONTAL_BOOST',
         targetClass: 'knight',
-        power: 75
+        power: 80
       },
       turn: 4
     }

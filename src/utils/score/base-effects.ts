@@ -1,6 +1,33 @@
 import type { Position, PlacedCard, Card, BaseEffect } from '@/types';
 import { getAdjacentCards, checkEnemyLine } from '@/utils/board';
 
+export function getSupportEffectMultiplier(
+  sourcePosition: Position,
+  board: (PlacedCard | null)[][]
+): number {
+  let multiplier = 1;
+
+  // 周囲のリーダー効果を確認（戦術の大師など）
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (!cell?.card.effect || !('type' in cell.card.effect)) return;
+      
+      if (cell.card.effect.type === 'LEADER_TACTICAL' && cell.card.effect.supportMultiplier) {
+        const distance = Math.max(
+          Math.abs(sourcePosition.row - rowIndex),
+          Math.abs(sourcePosition.col - colIndex)
+        );
+        
+        if (distance <= (cell.card.effect.range || 2)) {
+          multiplier *= cell.card.effect.supportMultiplier;
+        }
+      }
+    });
+  });
+
+  return multiplier;
+}
+
 export function calculateBaseEffect(
   sourcePosition: Position,
   targetPosition: Position,
@@ -45,6 +72,9 @@ export function calculateBaseEffect(
       }
     }
   }
+
+  let effectValue = 0;
+
 
   // その他の効果
   switch (effect.type) {
@@ -101,18 +131,24 @@ export function calculateBaseEffect(
     }
 
     case 'ROW_COLUMN_BUFF': {
-      if (!effect.power) return 0;
+      if (targetCard.card.category !== 'unit') return 0;  // ユニットのみに効果
       
       if (effect.targetDirection === 'vertical') {
         if (sourcePosition.col === targetPosition.col && 
             sourceCard.type === targetCard.card.type) {
-          return effect.power;
+          effectValue = effect.power || 0;
         }
-      } else if (effect.targetDirection === 'horizontal') {
+      } else {
         if (sourcePosition.row === targetPosition.row && 
             sourceCard.type === targetCard.card.type) {
-          return effect.power;
+          effectValue = effect.power || 0;
         }
+      }
+      
+      // サポートカードの効果倍率を適用
+      if (sourceCard.category === 'support') {
+        const multiplier = getSupportEffectMultiplier(sourcePosition, board);
+        effectValue *= multiplier;
       }
       break;
     }
@@ -132,5 +168,5 @@ export function calculateBaseEffect(
     }
   }
 
-  return 0;
+  return effectValue;
 }

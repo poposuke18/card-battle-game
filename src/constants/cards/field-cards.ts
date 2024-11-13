@@ -9,7 +9,7 @@ export const TURN3_CARDS: Card[] = [
       class: null,
       effect: {
         type: 'FIELD_UNIT_BUFF',
-        power: 50,
+        power: 40,
         range: 1
       },
       turn: 3
@@ -23,7 +23,7 @@ export const TURN3_CARDS: Card[] = [
       class: null,
       effect: {
         type: 'FIELD_UNIT_BUFF',
-        power: 30,
+        power: 10,
         range: 2
       },
       turn: 3
@@ -37,7 +37,7 @@ export const TURN3_CARDS: Card[] = [
       class: null,
       effect: {
         type: 'FIELD_UNIT_BUFF',
-        power: 50,
+        power: 60,
         range: 1
       },
       turn: 3
@@ -51,7 +51,7 @@ export const TURN3_CARDS: Card[] = [
       class: null,
       effect: {
         type: 'FIELD_UNIT_BUFF',
-        power: 30,
+        power: 20,
         range: 2
       },
       turn: 3

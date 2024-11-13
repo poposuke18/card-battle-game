@@ -9,6 +9,6 @@ export type LeaderEffectBonus = {
   export type ScoreDetails = {
     basePoints: number;
     effectPoints: number;
-    leaderBonus?: LeaderEffectBonus;  // リーダー効果によるボーナス
+    leaderEffectPoints: number;  // リーダー効果によるポイント
     totalPoints: number;
   };

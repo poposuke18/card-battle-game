@@ -14,9 +14,9 @@ export const TURN5_CARDS: Card[] = [
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
       classEffects: [
-        { class: 'warrior', power: 30 },
+        { class: 'warrior', power: 10 },
         { class: 'archer', power: 20 },
-        { class: 'knight', power: 25 }
+        { class: 'knight', power: 40 }
       ],
       range: 2
     },
@@ -32,8 +32,8 @@ export const TURN5_CARDS: Card[] = [
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
       classEffects: [
-        { class: 'mage', power: 35 },
-        { class: 'archer', power: 25 },
+        { class: 'mage', power: 50 },
+        { class: 'archer', power: 30 },
         { class: 'lancer', power: 20 }
       ],
       range: 2
@@ -48,7 +48,7 @@ export const TURN5_CARDS: Card[] = [
     points: 20,
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 30,
+      power: 20,
       targetDirection: 'vertical'
     },
     turn: 5
@@ -61,7 +61,7 @@ export const TURN5_CARDS: Card[] = [
     points: 30,
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 35,
+      power: 30,
       targetDirection: 'horizontal'
     },
     turn: 5
@@ -69,10 +69,9 @@ export const TURN5_CARDS: Card[] = [
   {
     id: '29',
     type: 'ally',
-    category: 'unit',
+    category: 'support',
     name: '武器職人',
     points: 40,
-    class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',
       range: 1,
@@ -93,9 +92,9 @@ export const TURN5_CARDS: Card[] = [
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
       classEffects: [
-        { class: 'warrior', power: 35 },
-        { class: 'archer', power: 25 },
-        { class: 'knight', power: 30 }
+        { class: 'warrior', power: 30 },
+        { class: 'archer', power: 40 },
+        { class: 'knight', power: 50 }
       ],
       range: 2
     },
@@ -109,7 +108,7 @@ export const TURN5_CARDS: Card[] = [
     points: 80,
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 35,
+      power: 40,
       targetDirection: 'vertical'
     },
     turn: 5
@@ -124,8 +123,8 @@ export const TURN5_CARDS: Card[] = [
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
       classEffects: [
-        { class: 'mage', power: 40 },
-        { class: 'lancer', power: 25 },
+        { class: 'mage', power: 90 },
+        { class: 'lancer', power: 30 },
         { class: 'archer', power: 20 }
       ],
       range: 2
@@ -135,10 +134,9 @@ export const TURN5_CARDS: Card[] = [
   {
     id: '33',
     type: 'enemy',
-    category: 'unit',
+    category: 'support',
     name: '闇の武器匠',
     points: 110,
-    class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',
       range: 1,

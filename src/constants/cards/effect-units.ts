@@ -19,7 +19,7 @@ export const TURN2_CARDS: Card[] = [
       type: 'ally',
       category: 'unit',
       name: '槍兵',
-      points: 100,
+      points: 90,
       class: 'lancer',
       effect: {
         type: 'SELF_POWER_UP_BY_ENEMY_LINE',
@@ -33,8 +33,8 @@ export const TURN2_CARDS: Card[] = [
       type: 'ally',
       category: 'unit',
       name: '重装盾兵',
-      class: 'warrior',
-      points: 90,
+      class: 'guardian',
+      points: 80,
       effect: {
         type: 'SELF_POWER_UP_BY_ADJACENT_ALLY',
         power: 20

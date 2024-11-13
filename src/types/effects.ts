@@ -11,6 +11,13 @@ export type BaseEffectType =
   | 'FIELD_CLASS_POWER_UP'
   | 'WEAPON_ENHANCEMENT';
 
+  export type LeaderEffectType = 
+  | 'LEADER_TACTICAL'     // 特定クラスの強化とサポート効果倍率
+  | 'LEADER_BASIC'        // 効果なし（純粋な点数のみ）
+  | 'LEADER_ENHANCEMENT'  // カテゴリーカードの点数加算
+  | 'LEADER_PROTECTION'   // 隣接ユニットによる効果
+  | 'LEADER_DEBUFF';      // 隣接ユニットへのデバフ
+
 type ClassEffect = {
   class: UnitClass;
   power: number;
@@ -40,23 +47,29 @@ export type WeaponEffect = {
   power: number;
 };
 
-export type LeaderEffectType = 
-  | 'LEADER_TACTICAL'    // クラス別強化
-  | 'LEADER_FORMATION'   // 陣形ボーナス
-  | 'LEADER_ENHANCEMENT' // 武器・サポート強化
-  | 'LEADER_PROTECTION'; // 防御・反撃
+export type Effect = BaseEffect | WeaponEffect | LeaderEffect;
 
-  export type LeaderEffect = {
-    type: LeaderEffectType;
-    classEffects?: ClassEffect[];
-    power?: number;
-    range?: number;
-    supportBonus?: number;
-    weaponBonus?: number;
-    defenseBonus?: number;
-    counterAttack?: number;
-    formationBonus?: {
-      vertical: number;
-      horizontal: number;
-    };
+export type CategoryBonus = {
+  weapon?: number;
+  field?: number;
+  support?: number;
+};
+
+export type LeaderEffect = {
+  type: LeaderEffectType;
+  classEffects?: {
+    class: UnitClass;
+    power: number;
+  }[];
+  range?: number;
+  supportMultiplier?: number;     // サポートカードの効果倍率
+  categoryBonus?: {              // カテゴリー別の点数加算
+    weapon?: number;
+    field?: number;
+    support?: number;
   };
+  adjacentAllyBonus?: number;    // 隣接する味方1体あたりの加算値
+  adjacentEnemyPenalty?: number; // 隣接する敵への減算値
+  adjacentEnemyBonus?: number;   // 隣接する敵1体あたりの加算値
+  adjacentDebuff?: number;       // 隣接ユニット全体への減算値
+};

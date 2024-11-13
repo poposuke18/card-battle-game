@@ -275,24 +275,25 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 手札エリア */}
           <div className="lg:col-span-1">
-            {!gameState.status.gameOver && (
-              <div className="bg-gray-800/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
-                <h2 className="text-xl font-bold mb-4 text-gray-300">手札</h2>
-                <div className="flex flex-row flex-wrap gap-2 justify-center">
-                  {gameState.currentHand.map((card, index) => (
-                    <AnimatedCard
-                      key={card.id}
-                      card={card}
-                      isSelected={gameState.selectedCard?.id === card.id}
-                      onClick={() => dispatch({ type: 'SELECT_CARD', card })}
-                      index={index}
-                      isNew={true}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+        {!gameState.status.gameOver && (
+          <div className="bg-gray-800/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+            <h2 className="text-xl font-bold mb-4 text-gray-300">手札</h2>
+            <div className="flex flex-row flex-wrap gap-2 justify-center">
+              {gameState.currentHand.map((card, index) => (
+                <AnimatedCard
+                  key={card.id}
+                  card={card}
+                  isSelected={gameState.selectedCard?.id === card.id}
+                  onClick={() => dispatch({ type: 'SELECT_CARD', card })}
+                  index={index}
+                  isNew={true}
+                  board={gameState.board}  // ボード情報を追加
+                />
+              ))}
+            </div>
           </div>
+        )}
+      </div>
 
           {/* ゲームボードエリア */}
           <div className="lg:col-span-2">

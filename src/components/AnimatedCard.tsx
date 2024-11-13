@@ -35,7 +35,9 @@ export default function AnimatedCard({
   isSelected, 
   onClick, 
   index, 
-  isNew 
+  isNew,
+  board,  // ボード情報を追加
+  position  // カードの位置情報を追加
 }: CardProps) {
   return (
     <motion.div
@@ -58,7 +60,7 @@ export default function AnimatedCard({
       <div className="h-full flex flex-col justify-between">
         {/* カード名とカテゴリー */}
         <div>
-          <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-xs">{card.name}</span>
             {card.effect && 'targetClass' in card.effect && (
               <EffectIcon type={card.effect.type} />
@@ -79,9 +81,15 @@ export default function AnimatedCard({
                   <span>フィールド</span>
                 </>
               )}
+              {card.category === 'support' && (
+                <>
+                  <span className="text-[12px]">📜</span>
+                  <span>サポート</span>
+                </>
+              )}
               {card.category === 'weapon' && (
                 <>
-                  <span className="text-[12px]">⚔️</span>
+                  <span className="text-[12px]">🗡️</span>
                   <span>武器</span>
                 </>
               )}
@@ -91,7 +99,7 @@ export default function AnimatedCard({
           {/* 効果の説明 */}
           {card.effect && (
             <div className="text-[10px] mb-1 p-1.5 bg-white/10 rounded leading-tight">
-              {getEffectDescription(card)}
+              {getEffectDescription(card, position, board)}
             </div>
           )}
         </div>
@@ -135,9 +143,15 @@ export default function AnimatedCard({
                   <span>フィールド</span>
                 </div>
               )}
+              {card.category === 'support' && (
+                <div className="flex items-center gap-1">
+                  <span className="text-base">📜</span>
+                  <span>サポート</span>
+                </div>
+              )}
               {card.category === 'weapon' && (
                 <div className="flex items-center gap-1">
-                  <span className="text-base">⚔️</span>
+                  <span className="text-base">🗡️</span>
                   <span>武器</span>
                 </div>
               )}

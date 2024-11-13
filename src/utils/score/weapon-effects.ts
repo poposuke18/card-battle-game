@@ -1,5 +1,37 @@
 import { Position, PlacedCard, Card, WeaponEffect } from '@/types';
-import { getAdjacentCards } from '@/utils/board';
+
+// 武器効果増幅係数を計算する関数を追加
+export function getWeaponEffectMultiplier(
+  sourcePosition: Position,
+  board: (PlacedCard | null)[][]
+): number {
+  let multiplier = 1; // デフォルトは1倍
+
+  // 周囲の武器職人の効果を確認
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (!cell?.card.effect) return;
+      
+      if (cell.card.effect.type === 'WEAPON_ENHANCEMENT') {
+        const distance = Math.abs(sourcePosition.row - rowIndex) + 
+                        Math.abs(sourcePosition.col - colIndex);
+        
+        if (distance <= (cell.card.effect.range || 1)) {
+          // 武器職人の倍率を適用
+          multiplier = cell.card.effect.effectMultiplier || 2;
+        }
+      }
+    });
+  });
+
+  // デバッグログ
+  console.log('Weapon multiplier:', {
+    position: sourcePosition,
+    multiplier
+  });
+
+  return multiplier;
+}
 
 export function calculateWeaponEffect(
   sourcePosition: Position,
@@ -20,9 +52,10 @@ export function calculateWeaponEffect(
 
   const rowDiff = Math.abs(sourcePosition.row - targetPosition.row);
   const colDiff = Math.abs(sourcePosition.col - targetPosition.col);
+  
+  // 基本効果値を計算
   let effectValue = 0;
-
-  // 基本の効果値を計算
+  
   switch (effect.type) {
     case 'VERTICAL_BOOST':
       effectValue = (rowDiff === 1 && colDiff === 0) ? effect.power : 0;
@@ -36,32 +69,22 @@ export function calculateWeaponEffect(
     case 'CROSS_FORMATION':
       effectValue = ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) ? effect.power : 0;
       break;
-    case 'SURROUND_BOOST':
-      // ... existing surround boost logic ...
-      break;
   }
 
+  // 効果がない場合は0を返す
   if (effectValue === 0) return 0;
 
-  // 武器強化効果の適用
-  board.forEach((row, rowIndex) => {
-    row.forEach((cell, colIndex) => {
-      if (!cell || !cell.card.effect) return;
-      
-      // 武器職人/武器匠の効果をチェック
-      if (cell.card.effect.type === 'WEAPON_ENHANCEMENT') {
-        const enhancerPosition = { row: rowIndex, col: colIndex };
-        const distanceToEnhancer = Math.abs(sourcePosition.row - rowIndex) + 
-                                 Math.abs(sourcePosition.col - colIndex);
-        
-        // 範囲内にいて、同じ陣営の武器職人/武器匠なら効果を適用
-        if (distanceToEnhancer <= (cell.card.effect.range || 1) && 
-            cell.card.type === sourceCard.type) {
-          effectValue *= cell.card.effect.effectMultiplier || 1;
-        }
-      }
-    });
+  // 武器職人の効果を適用
+  const multiplier = getWeaponEffectMultiplier(sourcePosition, board);
+
+  // デバッグログ
+  console.log('Weapon effect calculation:', {
+    sourceCard: sourceCard.name,
+    targetCard: targetCard.card.name,
+    baseEffect: effectValue,
+    multiplier,
+    finalEffect: effectValue * multiplier
   });
 
-  return effectValue;
+  return effectValue * multiplier;  // 武器職人の効果を適用
 }
