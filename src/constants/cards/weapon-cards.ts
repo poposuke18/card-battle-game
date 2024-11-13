@@ -7,7 +7,7 @@ export const TURN4_CARDS: Card[] = [
         type: 'ally',
         category: 'weapon',
         name: '聖なる剣',
-        points: 40,
+        points: 30,
         effect: {
           type: 'VERTICAL_BOOST',    // 上下の戦士のみに効果
           targetClass: 'warrior',
@@ -20,7 +20,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'ally',
       category: 'weapon',
       name: '精霊の弓',
-      points: 30,
+      points: 50,
       effect: {
         type: 'DIAGONAL_BOOST',
         targetClass: 'archer',
@@ -33,7 +33,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'ally',
       category: 'weapon',
       name: '聖騎士の大盾',
-      points: 35,
+      points: 40,
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'guardian',
@@ -46,7 +46,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'ally',
       category: 'weapon',
       name: '賢者の杖',
-      points: 35,
+      points: 30,
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'mage',
@@ -73,7 +73,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'enemy',
       category: 'weapon',
       name: '混沌の剣',
-      points: 50,
+      points: 70,
       effect: {
         type: 'VERTICAL_BOOST',
         targetClass: 'warrior',
@@ -86,7 +86,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'enemy',
       category: 'weapon',
       name: '魔族の鋼鉄盾',
-      points: 40,
+      points: 60,
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'guardian',
@@ -112,7 +112,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'enemy',
       category: 'weapon',
       name: '闇魔術師の杖',
-      points: 45,
+      points: 50,
       effect: {
         type: 'CROSS_FORMATION',
         targetClass: 'mage',
@@ -125,7 +125,7 @@ export const TURN4_CARDS: Card[] = [
       type: 'enemy',
       category: 'weapon',
       name: '死霊騎士の槍',
-      points: 55,
+      points: 70,
       effect: {
         type: 'HORIZONTAL_BOOST',
         targetClass: 'knight',

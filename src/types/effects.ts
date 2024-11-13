@@ -39,3 +39,24 @@ export type WeaponEffect = {
   targetClass: UnitClass;
   power: number;
 };
+
+export type LeaderEffectType = 
+  | 'LEADER_TACTICAL'    // クラス別強化
+  | 'LEADER_FORMATION'   // 陣形ボーナス
+  | 'LEADER_ENHANCEMENT' // 武器・サポート強化
+  | 'LEADER_PROTECTION'; // 防御・反撃
+
+  export type LeaderEffect = {
+    type: LeaderEffectType;
+    classEffects?: ClassEffect[];
+    power?: number;
+    range?: number;
+    supportBonus?: number;
+    weaponBonus?: number;
+    defenseBonus?: number;
+    counterAttack?: number;
+    formationBonus?: {
+      vertical: number;
+      horizontal: number;
+    };
+  };

@@ -4,20 +4,22 @@ import {
   TURN2_CARDS, 
   TURN3_CARDS, 
   TURN4_CARDS,
-  TURN5_CARDS
+  TURN5_CARDS,
+  TURN6_CARDS
 } from '@/constants/cards';
 import type { Card, CardType } from '@/types';
 
 // ターンごとのカード枚数設定
 const CARDS_PER_TURN = {
-  1: { ally: 3, enemy: 3 }, // 基本ユニット（3枚ずつに変更）
-  2: { ally: 2, enemy: 2 }, // 効果ユニット
-  3: { ally: 1, enemy: 1 }, // フィールドカード
-  4: { ally: 1, enemy: 1 }, // 武器カード
-  5: { ally: 2, enemy: 2 }  // 支援カード
+  1: { ally: 3, enemy: 3 },
+  2: { ally: 2, enemy: 2 },
+  3: { ally: 1, enemy: 1 },
+  4: { ally: 1, enemy: 1 },
+  5: { ally: 2, enemy: 2 },
+  6: { ally: 2, enemy: 2 }  // 6ターン目: 味方2枚、敵2枚
 } as const;
 
-export type TurnNumber = 1 | 2 | 3 | 4 | 5;
+export type TurnNumber = 1 | 2 | 3 | 4 | 5 | 6;  // 6を追加
 
 // カードタイプでフィルタリングする関数
 function filterCardsByType(cards: Card[], type: CardType): Card[] {
@@ -45,7 +47,8 @@ function getTurnCards(turn: TurnNumber): Card[] {
     case 2: return TURN2_CARDS;
     case 3: return TURN3_CARDS;
     case 4: return TURN4_CARDS;
-    case 5: return TURN5_CARDS;  // 追加
+    case 5: return TURN5_CARDS;
+    case 6: return TURN6_CARDS;  // 追加
   }
 }
 
@@ -77,7 +80,7 @@ export function generateRandomHand(): Card[] {
 export function generateNextHand(currentTurn: TurnNumber): Card[] {
   // 次のターンのカードを生成（5ターン目まで対応）
   const nextTurn = (currentTurn + 1) as TurnNumber;
-  if (nextTurn > 5) return [];
+  if (nextTurn > 6) return [];
   return generateHandForTurn(nextTurn);
 }
 

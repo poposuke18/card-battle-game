@@ -36,17 +36,34 @@ export function getEffectDescription(card: Card): string {
       return `周囲${card.effect.range}マス以内の味方ユニットの攻撃力+${card.effect.power}`;
     case 'FIELD_UNIT_DEBUFF':
       return `周囲${card.effect.range}マス以内のユニットの攻撃力-${card.effect.power}`;
-    case 'FIELD_CLASS_POWER_UP':
-      if (card.effect.classEffects) {
-        return card.effect.classEffects
-          .map(ce => `${getClassDisplayName(ce.class)}の攻撃力+${ce.power}`)
+    case 'FIELD_CLASS_POWER_UP': {
+        const range = card.effect.range || 1;
+        const effects = card.effect.classEffects
+          ?.map(ce => `${getClassDisplayName(ce.class)}+${ce.power}`)
           .join('、');
+        return `周囲${range}マス以内の${effects}`;
       }
       return '';
     case 'ROW_COLUMN_BUFF':
       return `${card.effect.targetDirection === 'vertical' ? '縦' : '横'}一列の味方ユニットの攻撃力+${card.effect.power}`;
       case 'WEAPON_ENHANCEMENT':
         return `周囲${card.effect.range}マス以内の味方武器カードの効果を2倍にする`;
+        case 'LEADER_TACTICAL': {
+          const effects = card.effect.classEffects
+            ?.map(ce => `${getClassDisplayName(ce.class)}+${ce.power}`)
+            .join('、');
+          return `周囲${card.effect.range}マス以内の${effects}。サポート効果+${card.effect.supportBonus}%`;
+        }
+        case 'LEADER_FORMATION': {
+          return `周囲のユニット+${card.effect.power}。縦列+${card.effect.formationBonus?.vertical}、横列+${card.effect.formationBonus?.horizontal}`;
+        }
+        case 'LEADER_ENHANCEMENT': {
+          return `武器効果+${card.effect.weaponBonus}%、サポート効果+${card.effect.supportBonus}%`;
+        }
+        case 'LEADER_PROTECTION': {
+          const range = card.effect.range || 1;
+          return `周囲${range}マス以内の味方ユニットの防御+${card.effect.defenseBonus}、反撃+${card.effect.counterAttack}`;
+        }
     default:
       return '';
   }

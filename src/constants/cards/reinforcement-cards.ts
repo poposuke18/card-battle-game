@@ -27,7 +27,7 @@ export const TURN5_CARDS: Card[] = [
     type: 'ally',
     category: 'unit',
     name: '魔導師',
-    points: 110,
+    points: 80,
     class: 'mage',
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
@@ -43,9 +43,9 @@ export const TURN5_CARDS: Card[] = [
   {
     id: '27',
     type: 'ally',
-    category: 'field',
+    category: 'support',
     name: '勝利の旗印',
-    points: 70,
+    points: 20,
     effect: {
       type: 'ROW_COLUMN_BUFF',
       power: 30,
@@ -56,9 +56,9 @@ export const TURN5_CARDS: Card[] = [
   {
     id: '28',
     type: 'ally',
-    category: 'field',
+    category: 'support',
     name: '英雄の詩',
-    points: 60,
+    points: 30,
     effect: {
       type: 'ROW_COLUMN_BUFF',
       power: 35,
@@ -71,7 +71,7 @@ export const TURN5_CARDS: Card[] = [
     type: 'ally',
     category: 'unit',
     name: '武器職人',
-    points: 80,
+    points: 40,
     class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',
@@ -88,7 +88,7 @@ export const TURN5_CARDS: Card[] = [
     type: 'enemy',
     category: 'unit',
     name: '闇の指揮官',
-    points: 90,
+    points: 100,
     class: 'knight',
     effect: {
       type: 'FIELD_CLASS_POWER_UP',
@@ -104,9 +104,9 @@ export const TURN5_CARDS: Card[] = [
   {
     id: '31',
     type: 'enemy',
-    category: 'field',
+    category: 'support',
     name: '破滅の戦旗',
-    points: 90,
+    points: 80,
     effect: {
       type: 'ROW_COLUMN_BUFF',
       power: 35,
@@ -137,7 +137,7 @@ export const TURN5_CARDS: Card[] = [
     type: 'enemy',
     category: 'unit',
     name: '闇の武器匠',
-    points: 100,
+    points: 110,
     class: 'warrior',
     effect: {
       type: 'WEAPON_ENHANCEMENT',

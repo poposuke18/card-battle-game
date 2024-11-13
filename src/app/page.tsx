@@ -149,7 +149,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     
       const nextTurn = state.status.turn + 1;
       // ここを4から5に変更
-      if (nextTurn > 5) {
+      if (nextTurn > 6) {
         const { allyScore, enemyScore } = calculateScores(state.board);
         return {
           ...state,

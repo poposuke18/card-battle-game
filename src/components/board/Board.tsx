@@ -167,6 +167,7 @@ export default function Board({ board, selectedCard, onPlaceCard, onHoverCard }:
     {cell.card.category === 'unit' && cell.card.class && getClassIcon(cell.card.class)}
     {cell.card.category === 'weapon' && '⚔️'}
     {cell.card.category === 'field' && '🏰'}
+    {cell.card.category === 'support' && '📜'}
   </div>
   
   <span className="font-medium text-[10px] mb-0.5 opacity-90">
