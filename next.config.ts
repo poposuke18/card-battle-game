@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'export',  // 追加: 静的エクスポートを有効化
+  output: 'export',
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
+  basePath: '/card-battle-game',
+  assetPrefix: '/card-battle-game/',
+  trailingSlash: true,
 }
 
 module.exports = nextConfig
