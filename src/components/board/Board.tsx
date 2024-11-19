@@ -1,201 +1,271 @@
-import React, { useState, useEffect, useMemo } from 'react';
+// src/components/board/Board.tsx
+
+import React, { memo, useMemo, useCallback, useState } from 'react';  // useState を追加
+import { CardScore } from '@/components/card/CardScore';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { PlacedCard, Card, Position } from '@/types';
-import { calculateCardScore } from '@/utils/score/calculator';
-import { CardDetails } from './CardDetails';
-import { getWeaponEffectPositions, getBaseEffectPositions } from '@/utils/effect-utils';
-import { AnimatedScore } from '../score/AnimatedScore';
-import { getClassIcon } from '@/utils/common';  // この行を追加
+import { PlacedCardContent } from './PlacedCardContent';
+import { calculateCardScore } from '@/utils/score/calculator';  // この行を追加
+import { PreviewContent } from './PreviewContent';
+import { 
+  EffectRangeOverlay, 
+  EffectLine, 
+  EffectIcon,
+  EffectDescription
+} from '@/components/effects/EffectDisplay';
+import { getClassIcon } from '@/utils/common';
+import { 
+  usePerformanceMonitor,
+  useBoardChanges,
+  useEffectCalculation,
+  createPositionCache
+} from '@/utils/performance/optimizations';
+import { 
+  calculateEffectValue, 
+  getEffectDetails, 
+  getEffectStyle,
+  getEffectRange 
+} from '@/utils/effects/index';
 
+// セルの位置計算用キャッシュ
+const positionCache = createPositionCache();
 
-type BoardProps = {
-  board: (PlacedCard | null)[][];
+type BoardCellProps = {
+  position: Position;
+  cell: PlacedCard | null;
+  isSelected: boolean;
+  isHovered: boolean;
+  isInEffectRange: boolean;
+  onCellClick: () => void;
+  onCellHover: () => void;
+  onCellLeave: () => void;
   selectedCard: Card | null;
-  onPlaceCard: (position: Position) => void;
+  previewScore: number | null;
+  board: (PlacedCard | null)[][];
 };
 
-export default function Board({ board, selectedCard, onPlaceCard, onHoverCard }: BoardProps) {
+// 個別のセルコンポーネント
+const BoardCell = memo(({
+  position,
+  cell,
+  isSelected,
+  isHovered,
+  isInEffectRange,
+  onCellClick,
+  onCellHover,
+  onCellLeave,
+  selectedCard,  // selectedCardをpropsから受け取る
+  previewScore,
+  board
+}: BoardCellProps) => {
+  const calculatedScore = useMemo(() => {
+    if (!cell) return null;
+    return calculateCardScore(position, board, cell);
+  }, [position, board, cell]);
+
+  // セルのクラス名を定義
+  const cellClassNames = useMemo(() => {
+    return [
+      'aspect-square',
+      'w-full',
+      'h-full',
+      'bg-gray-700/50',
+      'backdrop-blur-sm',
+      'border',
+      'border-gray-600/50',
+      'rounded-lg',
+      'p-0.5',
+      'flex',
+      'items-center',
+      'justify-center',
+      'cursor-pointer',
+      'hover:bg-gray-600/50',
+      'relative',
+      'transition-all',
+      'duration-200',
+      selectedCard && !cell ? 'hover:border-yellow-400/50 hover:bg-gray-600/70' : '',
+      cell ? 'shadow-md' : 'hover:shadow-lg',
+      isInEffectRange ? 'ring-2 ring-blue-400/30 bg-blue-500/10' : '',
+    ].filter(Boolean).join(' ');
+  }, [selectedCard, cell, isInEffectRange]);  // selectedCardを依存配列に含める
+
+  return (
+    <motion.div
+      className={cellClassNames}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ 
+        delay: (position.row * 5 + position.col) * 0.05,
+        duration: 0.2
+      }}
+      whileHover={!cell ? { scale: 1.05 } : undefined}
+      onClick={onCellClick}
+      onMouseEnter={onCellHover}
+      onMouseLeave={onCellLeave}
+    >
+      <AnimatePresence mode="wait">
+        {cell ? (
+          <PlacedCardContent
+            cell={cell}
+            position={position}
+            isSelected={isSelected}
+            isHovered={isHovered}
+            board={board}
+            score={calculatedScore?.totalPoints}
+          />
+        ) : selectedCard && isHovered ? (
+          <PreviewContent
+            card={selectedCard}
+            previewScore={previewScore}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      {selectedCard && !cell && (
+        <AvailableSlotIndicator />
+      )}
+    </motion.div>
+  );
+});
+
+// カード配置プレビュー
+const PreviewContent = memo(({
+  card,
+  previewScore
+}: {
+  card: Card;
+  previewScore: number | null;
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 flex items-center justify-center"
+    >
+      <div className="absolute inset-0 bg-gray-900/50 rounded-lg" />
+      {previewScore !== null && (
+        <span className={`
+          relative text-lg font-bold
+          ${previewScore > 0 ? 'text-green-400' : 'text-red-400'}
+        `}>
+          {previewScore > 0 ? '+' : ''}{previewScore}
+        </span>
+      )}
+    </motion.div>
+  );
+});
+
+// 配置可能スロットの表示
+const AvailableSlotIndicator = memo(() => {
+  return (
+    <motion.div
+      className="absolute inset-0 border-2 border-yellow-400/50 rounded-lg"
+      animate={{ opacity: [0.3, 0.6, 0.3] }}
+      transition={{ duration: 1.5, repeat: Infinity }}
+    />
+  );
+});
+
+// メインのボードコンポーネント
+export const Board = memo(({
+  board,
+  selectedCard,
+  onPlaceCard,
+  onHoverCard
+}: BoardProps) => {
   const [hoveredPosition, setHoveredPosition] = useState<Position | null>(null);
-  const [affectedPositions, setAffectedPositions] = useState<Position[]>([]);
-  const [previousScores, setPreviousScores] = useState<Map<string, number>>(new Map());
-  const [hoveredCard, setHoveredCard] = useState<{
-    card: PlacedCard;
-    position: Position;
-  } | null>(null);
-
-  // キャッシュされたスコアマップを計算
-  const currentScores = useMemo(() => {
-    const scoreMap = new Map<string, number>();
-    board.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        if (cell) {
-          const position = `${rowIndex}-${colIndex}`;
-          const scoreDetails = calculateCardScore(
-            { row: rowIndex, col: colIndex },
-            board,
-            cell
-          );
-          scoreMap.set(position, scoreDetails.totalPoints);
-        }
-      });
-    });
-    return scoreMap;
-  }, [board]);
-
-  const effectRangeHighlight = useMemo(() => {
-    if (!hoveredPosition) return null;
+  
+  // 効果範囲の計算
+  const effectRange = useMemo(() => {
+    if (!hoveredPosition) return [];
     
-    const hoveredCard = board[hoveredPosition.row][hoveredPosition.col];
-    if (!hoveredCard?.card.effect) return null;
-
-    if ('targetClass' in hoveredCard.card.effect) {
-      return getWeaponEffectPositions(hoveredPosition, hoveredCard, board);
-    } else {
-      return getBaseEffectPositions(hoveredPosition, hoveredCard, board);
-    }
+    const cell = board[hoveredPosition.row][hoveredPosition.col];
+    if (!cell?.card.effect) return [];
+    
+    // getEffectRange を使用して効果範囲を計算
+    return getEffectRange(cell.card, hoveredPosition);
   }, [hoveredPosition, board]);
 
-  // ボードの更新を処理
-  useEffect(() => {
-    const newScores = new Map(currentScores);
-    const changed: Position[] = [];
+  // プレビュースコアの計算
+  const calculatePreviewScore = useCallback((position: Position) => {
+    if (!selectedCard) return null;
 
-    board.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        if (cell) {
-          const position = `${rowIndex}-${colIndex}`;
-          const prevScore = previousScores.get(position);
-          const currentScore = newScores.get(position);
-          
-          if (prevScore !== undefined && 
-              currentScore !== undefined && 
-              prevScore !== currentScore) {
-            changed.push({ row: rowIndex, col: colIndex });
-          }
-        }
-      });
-    });
+    // 仮想的なボードの状態を作成
+    const virtualBoard = board.map(row => [...row]);
+    virtualBoard[position.row][position.col] = {
+      card: selectedCard,
+      position: position
+    };
 
-    if (changed.length > 0) {
-      setAffectedPositions(changed);
-      setPreviousScores(newScores);
+    // 新しい位置でのスコアを計算
+    const scoreDetails = calculateCardScore(
+      position,
+      virtualBoard,
+      { card: selectedCard, position }
+    );
 
-      const timer = setTimeout(() => {
-        setAffectedPositions([]);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setPreviousScores(newScores);
+    // 基礎点からの変化量を返す
+    return scoreDetails.totalPoints - selectedCard.points;
+  }, [selectedCard, board]);
+
+  // セルクリックのハンドラー
+  const handleCellClick = useCallback((position: Position) => {
+    if (selectedCard && !board[position.row][position.col]) {
+      onPlaceCard(position);
     }
-  }, [board, currentScores]);
+  }, [selectedCard, board, onPlaceCard]);
+
+  // セルホバーのハンドラー
+  const handleCellHover = useCallback((position: Position) => {
+    setHoveredPosition(position);
+    const cell = board[position.row][position.col];
+    if (cell) {
+      onHoverCard({ card: cell, position });
+    }
+  }, [board, onHoverCard]);
+
+  // セルホバー解除のハンドラー
+  const handleCellLeave = useCallback(() => {
+    setHoveredPosition(null);
+    onHoverCard(null);
+  }, [onHoverCard]);
 
   return (
     <div className="relative">
-      {/* カード詳細の表示位置を変更 */}
-    <div className="max-w-[400px] mx-auto grid grid-cols-5 gap-1 p-3 
-                    bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-inner">
-        {board.map((row, rowIndex) => 
+      <div className="max-w-[500px] mx-auto grid grid-cols-5 gap-1 p-4 
+        bg-gradient-to-br from-gray-800 to-gray-900 
+        rounded-xl shadow-inner relative z-10"
+      >
+        {board.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
             const position = { row: rowIndex, col: colIndex };
-          const positionKey = `${rowIndex}-${colIndex}`;
-          const currentScore = currentScores.get(positionKey) ?? 0;
-          const previousScore = previousScores.get(positionKey) ?? currentScore;
-          const isAffected = affectedPositions.some(
-            pos => pos.row === rowIndex && pos.col === colIndex
-          );
+            const isHovered = hoveredPosition?.row === rowIndex && 
+                            hoveredPosition?.col === colIndex;
+            const isInEffectRange = effectRange.some(pos => 
+              pos.row === rowIndex && pos.col === colIndex
+            );
 
-          const isHovered = hoveredPosition?.row === rowIndex && 
-                           hoveredPosition?.col === colIndex;
-                           
-          // エフェクト範囲のハイライト判定をここに追加
-          const isInEffectRange = effectRangeHighlight?.some(
-            pos => pos.row === rowIndex && pos.col === colIndex
-          );
-
-          // カードの効果タイプに基づいてハイライトの色を決定
-          const hoveredCard = hoveredPosition 
-            ? board[hoveredPosition.row][hoveredPosition.col] 
-            : null;
-            
-          const effectHighlightClass = isInEffectRange
-            ? hoveredCard?.card.type === 'ally'
-              ? 'ring-2 ring-blue-400/30'
-              : 'ring-2 ring-red-400/30'
-            : '';
-
-          return (
-            <motion.div
+            return (
+              <BoardCell
                 key={`${rowIndex}-${colIndex}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: (rowIndex * 5 + colIndex) * 0.05 }}
-              className={`aspect-square bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 
-                         rounded-lg p-1 flex items-center justify-center cursor-pointer 
-                         hover:bg-gray-600/50 relative transition-all duration-200
-                         ${selectedCard && !cell ? 'hover:border-yellow-400/50 hover:bg-gray-600/70' : ''}
-                         ${cell ? 'shadow-md' : 'hover:shadow-lg'}
-                         ${effectHighlightClass}`}
-              whileHover={!cell ? { scale: 1.05 } : {}}
-              onClick={() => onPlaceCard(position)}
-              onMouseEnter={() => {
-                setHoveredPosition(position);
-                if (cell) {
-                  onHoverCard({ card: cell, position });
-                }
-              }}
-              onMouseLeave={() => {
-                setHoveredPosition(null);
-                onHoverCard(null);
-              }}
-            >
-                              <AnimatePresence>
-                                {cell && (
-                                  // src/components/Board.tsx の該当部分を修正
+                position={position}
+                cell={cell}
+                isSelected={false}
+                isHovered={isHovered}
+                isInEffectRange={isInEffectRange}
+                onCellClick={() => handleCellClick(position)}
+                onCellHover={() => handleCellHover(position)}
+                onCellLeave={handleCellLeave}
+                selectedCard={selectedCard}
+                previewScore={isHovered ? calculatePreviewScore(position) : null}
+                board={board}
+              />
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+});
 
-<motion.div
-  initial={{ scale: 0 }}
-  animate={{ scale: 1 }}
-  exit={{ scale: 0 }}
-  className={`w-full h-full rounded flex items-center justify-center flex-col relative
-    ${cell.card.type === 'ally' 
-      ? 'bg-blue-500/90 text-white ring-1 ring-blue-400/50' 
-      : 'bg-red-500/90 text-white ring-1 ring-red-400/50'}`}
->
-  {/* カテゴリーアイコンを追加 */}
-  <div className="absolute top-1 left-1 text-xs opacity-70">
-    {cell.card.category === 'unit' && cell.card.class && getClassIcon(cell.card.class)}
-    {cell.card.category === 'weapon' && '⚔️'}
-    {cell.card.category === 'field' && '🏰'}
-    {cell.card.category === 'support' && '📜'}
-  </div>
-  
-  <span className="font-medium text-[10px] mb-0.5 opacity-90">
-    {cell.card.name}
-  </span>
-  <AnimatedScore
-    score={currentScore}
-    isAffected={isAffected}
-    previousScore={previousScore}
-  />
-  
-</motion.div>
-                                )}
-                              </AnimatePresence>
-                  
-                              {selectedCard && !cell && (
-                                <motion.div
-                                  className="absolute inset-0 border-2 border-yellow-400/50 rounded-lg"
-                                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
-                                />
-                              )}
-                            </motion.div>
-                          );
-                        })
-                      )}
-                    </div>
-                    </div>
-
-                  );
-}
+Board.displayName = 'Board';

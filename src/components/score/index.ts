@@ -1,2 +1,3 @@
+// src/components/score/index.ts
+
 export { AnimatedScore } from './AnimatedScore';
-export { ScorePopup } from './ScorePopup';

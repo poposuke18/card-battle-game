@@ -1,136 +1,139 @@
-import { Card } from '@/types';
+import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES, calculateCardPoints } from './card-base';
+import type { Card } from '@/types';
+
 
 export const TURN4_CARDS: Card[] = [
-    // 味方武器カード
-    {
-        id: '17',
-        type: 'ally',
-        category: 'weapon',
-        name: '聖なる剣',
-        points: 30,
-        effect: {
-          type: 'VERTICAL_BOOST',    // 上下の戦士のみに効果
-          targetClass: 'warrior',
-          power: 50
-        },
-        turn: 4
-      },
-    {
-      id: '18',
-      type: 'ally',
-      category: 'weapon',
-      name: '精霊の弓',
-      points: 50,
-      effect: {
-        type: 'DIAGONAL_BOOST',
-        targetClass: 'archer',
-        power: 70
-      },
-      turn: 4
+  // 味方武器カード
+  createCard({
+    id: generateCardId('weapon', 'ally', 41),
+    name: '聖なる剣',
+    type: 'ally',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'ally', 4, 1, true),
+    effect: {
+      type: 'VERTICAL_BOOST',
+      targetClass: 'warrior',
+      power: EFFECT_VALUES.VERTICAL
     },
-    {
-      id: '25',
-      type: 'ally',
-      category: 'weapon',
-      name: '聖騎士の大盾',
-      points: 40,
-      effect: {
-        type: 'CROSS_FORMATION',
-        targetClass: 'guardian',
-        power: 40
-      },
-      turn: 4
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'ally', 42),
+    name: '精霊の弓',
+    type: 'ally',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'ally', 4, 1, true),
+    effect: {
+      type: 'DIAGONAL_BOOST',
+      targetClass: 'archer',
+      power: EFFECT_VALUES.DIAGONAL
     },
-    {
-      id: '19',
-      type: 'ally',
-      category: 'weapon',
-      name: '賢者の杖',
-      points: 30,
-      effect: {
-        type: 'CROSS_FORMATION',
-        targetClass: 'mage',
-        power: 50
-      },
-      turn: 4
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'ally', 43),
+    name: '聖騎士の大盾',
+    type: 'ally',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'ally', 4, 1, true),
+    effect: {
+      type: 'CROSS_FORMATION',
+      targetClass: 'guardian',
+      power: EFFECT_VALUES.ADJACENT
     },
-    {
-        id: '18',
-        type: 'ally',
-        category: 'weapon',
-        name: '精霊の槍',
-        points: 30,
-        effect: {
-          type: 'HORIZONTAL_BOOST',  // 左右の槍兵のみに効果
-          targetClass: 'lancer',
-          power: 50
-        },
-        turn: 4
-      },
-    // 敵武器カード
-    {
-      id: '21',
-      type: 'enemy',
-      category: 'weapon',
-      name: '混沌の剣',
-      points: 70,
-      effect: {
-        type: 'VERTICAL_BOOST',
-        targetClass: 'warrior',
-        power: 60
-      },
-      turn: 4
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'ally', 45),
+    name: '精霊の槍',
+    type: 'ally',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'ally', 4, 1, true),
+    effect: {
+      type: 'HORIZONTAL_BOOST',
+      targetClass: 'lancer',  // 槍兵のみに効果を与えるように修正
+      power: EFFECT_VALUES.HORIZONTAL
     },
-    {
-      id: '26',
-      type: 'enemy',
-      category: 'weapon',
-      name: '魔族の鋼鉄盾',
-      points: 60,
-      effect: {
-        type: 'CROSS_FORMATION',
-        targetClass: 'guardian',
-        power: 70
-      },
-      turn: 4
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'ally', 44),
+    name: '賢者の杖',
+    type: 'ally',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'ally', 4, 1, true),
+    effect: {
+      type: 'CROSS_FORMATION',
+      targetClass: 'mage',
+      power: EFFECT_VALUES.ADJACENT
     },
-    {
-      id: '22',
-      type: 'enemy',
-      category: 'weapon',
-      name: '死霊の弓',
-      points: 40,
-      effect: {
-        type: 'DIAGONAL_BOOST',
-        targetClass: 'archer',
-        power: 80
-      },
-      turn: 4
+    turn: 4
+  }),
+
+  // 敵武器カード
+  createCard({
+    id: generateCardId('weapon', 'enemy', 41),
+    name: '混沌の剣',
+    type: 'enemy',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'enemy', 4, 1, true),
+    effect: {
+      type: 'VERTICAL_BOOST',
+      targetClass: 'warrior',
+      power: EFFECT_VALUES.VERTICAL * 1.4
     },
-    {
-      id: '23',
-      type: 'enemy',
-      category: 'weapon',
-      name: '闇魔術師の杖',
-      points: 50,
-      effect: {
-        type: 'CROSS_FORMATION',
-        targetClass: 'mage',
-        power: 60
-      },
-      turn: 4
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'enemy', 42),
+    name: '死霊の弓',
+    type: 'enemy',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'enemy', 4, 1, true),
+    effect: {
+      type: 'DIAGONAL_BOOST',
+      targetClass: 'archer',
+      power: EFFECT_VALUES.DIAGONAL * 1.4
     },
-    {
-      id: '24',
-      type: 'enemy',
-      category: 'weapon',
-      name: '死霊騎士の槍',
-      points: 70,
-      effect: {
-        type: 'HORIZONTAL_BOOST',
-        targetClass: 'knight',
-        power: 80
-      },
-      turn: 4
-    }
-  ];
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'enemy', 43),
+    name: '魔族の鋼鉄盾',
+    type: 'enemy',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'enemy', 4, 1, true),
+    effect: {
+      type: 'CROSS_FORMATION',
+      targetClass: 'guardian',
+      power: EFFECT_VALUES.ADJACENT * 1.4
+    },
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'enemy', 44),
+    name: '闇魔術師の杖',
+    type: 'enemy',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'enemy', 4, 1, true),
+    effect: {
+      type: 'CROSS_FORMATION',
+      targetClass: 'mage',
+      power: EFFECT_VALUES.ADJACENT * 1.4
+    },
+    turn: 4
+  }),
+  createCard({
+    id: generateCardId('weapon', 'enemy', 45),
+    name: '死霊騎士の槍',
+    type: 'enemy',
+    category: 'weapon',
+    points: calculateCardPoints(BASE_POINTS.WEAPON, 'enemy', 4, 1, true),
+    effect: {
+      type: 'HORIZONTAL_BOOST',
+      targetClass: 'lancer',  // 槍兵のみに効果を与えるように修正
+      power: EFFECT_VALUES.HORIZONTAL * 1.4
+    },
+    turn: 4
+  })
+];

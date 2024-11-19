@@ -1,147 +1,146 @@
-// src/constants/cards/reinforcement-cards.ts
-
-import { Card } from '@/types';
+import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES, calculateCardPoints } from './card-base';
+import type { Card } from '@/types';
 
 export const TURN5_CARDS: Card[] = [
-  // 味方カード
-  {
-    id: '25',
+  // 味方補強カード
+  createCard({
+    id: generateCardId('support', 'ally', 51),
+    name: '竜騎士',
     type: 'ally',
     category: 'unit',
-    name: '指揮官',
-    points: 50,
     class: 'knight',
+    points: calculateCardPoints(BASE_POINTS.UNIT.knight, 'ally', 5, 1, true),
     effect: {
-      type: 'FIELD_CLASS_POWER_UP',
-      classEffects: [
-        { class: 'warrior', power: 10 },
-        { class: 'archer', power: 20 },
-        { class: 'knight', power: 40 }
-      ],
-      range: 2
+      type: 'ADJACENT_UNIT_BUFF',
+      power: EFFECT_VALUES.ADJACENT * 1.5,
+      range: 1
     },
     turn: 5
-  },
-  {
-    id: '26',
+  }),
+  createCard({
+    id: generateCardId('support', 'ally', 52),
+    name: '魔導師',
     type: 'ally',
     category: 'unit',
-    name: '魔導師',
-    points: 80,
     class: 'mage',
+    points: calculateCardPoints(BASE_POINTS.UNIT.mage, 'ally', 5, 1, true),
     effect: {
-      type: 'FIELD_CLASS_POWER_UP',
-      classEffects: [
-        { class: 'mage', power: 50 },
-        { class: 'archer', power: 30 },
-        { class: 'lancer', power: 20 }
-      ],
-      range: 2
+      type: 'FIELD_DUAL_EFFECT',
+      range: 2,
+      allyBonus: Math.floor(EFFECT_VALUES.FIELD * 0.8),
+      enemyPenalty: -Math.floor(EFFECT_VALUES.FIELD * 0.6)
     },
     turn: 5
-  },
-  {
-    id: '27',
+  }),
+  createCard({
+    id: generateCardId('support', 'ally', 53),
+    name: '武器職人',
     type: 'ally',
     category: 'support',
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'ally', 5, 1, true),
+    effect: {
+      type: 'WEAPON_ENHANCEMENT',
+      range: 1,
+      effectMultiplier: 2,
+      power: 30
+    },
+    turn: 5
+  }),
+  createCard({
+    id: generateCardId('support', 'ally', 54),
     name: '勝利の旗印',
-    points: 20,
+    type: 'ally',
+    category: 'support',
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'ally', 5, 1, true),
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 20,
+      power: EFFECT_VALUES.VERTICAL * 0.5,
       targetDirection: 'vertical'
     },
     turn: 5
-  },
-  {
-    id: '28',
+  }),
+  createCard({
+    id: generateCardId('support', 'ally', 55),
+    name: '戦術の書',
     type: 'ally',
     category: 'support',
-    name: '英雄の詩',
-    points: 30,
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'ally', 5, 1, true),
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 30,
+      power: EFFECT_VALUES.HORIZONTAL * 0.5,
       targetDirection: 'horizontal'
     },
     turn: 5
-  },
-  {
-    id: '29',
-    type: 'ally',
+  }),
+
+  // 敵補強カード
+  createCard({
+    id: generateCardId('support', 'enemy', 51),
+    name: '暗黒騎士',
+    type: 'enemy',
+    category: 'unit',
+    class: 'knight',
+    points: calculateCardPoints(BASE_POINTS.UNIT.knight, 'enemy', 5, 1, true),
+    effect: {
+      type: 'ADJACENT_UNIT_BUFF',
+      power: EFFECT_VALUES.ADJACENT * 1.8,
+      range: 1
+    },
+    turn: 5
+  }),
+  createCard({
+    id: generateCardId('support', 'enemy', 52),
+    name: '破壊の魔術師',
+    type: 'enemy',
+    category: 'unit',
+    class: 'mage',
+    points: calculateCardPoints(BASE_POINTS.UNIT.mage, 'enemy', 5, 1, true),
+    effect: {
+      type: 'FIELD_DUAL_EFFECT',
+      range: 2,
+      allyBonus: EFFECT_VALUES.FIELD,
+      enemyPenalty: -Math.floor(EFFECT_VALUES.FIELD * 0.8)
+    },
+    turn: 5
+  }),
+  createCard({
+    id: generateCardId('support', 'enemy', 53),
+    name: '闇の武器匠',
+    type: 'enemy',
     category: 'support',
-    name: '武器職人',
-    points: 40,
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'enemy', 5, 1, true),
     effect: {
       type: 'WEAPON_ENHANCEMENT',
       range: 1,
-      // pointsBonusとpowerBonusを削除し、新しい効果を追加
-      effectMultiplier: 2  // 武器カードの効果を2倍にする
+      effectMultiplier: 2.5,
+      power: 40
     },
     turn: 5
-  },
-  
-  // 敵カード
-  {
-    id: '30',
-    type: 'enemy',
-    category: 'unit',
-    name: '闇の指揮官',
-    points: 100,
-    class: 'knight',
-    effect: {
-      type: 'FIELD_CLASS_POWER_UP',
-      classEffects: [
-        { class: 'warrior', power: 30 },
-        { class: 'archer', power: 40 },
-        { class: 'knight', power: 50 }
-      ],
-      range: 2
-    },
-    turn: 5
-  },
-  {
-    id: '31',
+  }),
+  createCard({
+    id: generateCardId('support', 'enemy', 54),
+    name: '破滅の戦旗',
     type: 'enemy',
     category: 'support',
-    name: '破滅の戦旗',
-    points: 80,
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'enemy', 5, 1, true),
     effect: {
       type: 'ROW_COLUMN_BUFF',
-      power: 40,
+      power: EFFECT_VALUES.VERTICAL * 0.8,
       targetDirection: 'vertical'
     },
     turn: 5
-  },
-  {
-    id: '32',
-    type: 'enemy',
-    category: 'unit',
-    name: '死霊魔導師',
-    points: 130,
-    class: 'mage',
-    effect: {
-      type: 'FIELD_CLASS_POWER_UP',
-      classEffects: [
-        { class: 'mage', power: 90 },
-        { class: 'lancer', power: 30 },
-        { class: 'archer', power: 20 }
-      ],
-      range: 2
-    },
-    turn: 5
-  },
-  {
-    id: '33',
+  }),
+  createCard({
+    id: generateCardId('support', 'enemy', 55),
+    name: '闇の戦術書',
     type: 'enemy',
     category: 'support',
-    name: '闇の武器匠',
-    points: 110,
+    points: calculateCardPoints(BASE_POINTS.SUPPORT, 'enemy', 5, 1, true),
     effect: {
-      type: 'WEAPON_ENHANCEMENT',
-      range: 1,
-      effectMultiplier: 2  // 武器カードの効果を2倍にする
+      type: 'ROW_COLUMN_BUFF',
+      power: EFFECT_VALUES.HORIZONTAL * 0.8,
+      targetDirection: 'horizontal'
     },
     turn: 5
-  }
+  })
 ];

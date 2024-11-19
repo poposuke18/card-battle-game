@@ -1,59 +1,64 @@
-import { Card } from '@/types';
+import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES, calculateCardPoints } from './card-base';
+import type { Card, FieldEffect } from '@/types';
+
 export const TURN3_CARDS: Card[] = [
-    {
-      id: '13',
-      type: 'ally',
-      category: 'field',
-      name: '要塞',
-      points: 60,
-      class: null,
-      effect: {
-        type: 'FIELD_UNIT_BUFF',
-        power: 40,
-        range: 1
-      },
-      turn: 3
-    },
-    {
-      id: '14',
-      type: 'ally',
-      category: 'field',
-      name: '魔法陣',
-      points: 80,
-      class: null,
-      effect: {
-        type: 'FIELD_UNIT_BUFF',
-        power: 10,
-        range: 2
-      },
-      turn: 3
-    },
-    {
-      id: '15',
-      type: 'enemy',
-      category: 'field',
-      name: '魔界門',
-      points: 160,
-      class: null,
-      effect: {
-        type: 'FIELD_UNIT_BUFF',
-        power: 60,
-        range: 1
-      },
-      turn: 3
-    },
-    {
-      id: '16',
-      type: 'enemy',
-      category: 'field',
-      name: '死霊の祭壇',
-      points: 110,
-      class: null,
-      effect: {
-        type: 'FIELD_UNIT_BUFF',
-        power: 20,
-        range: 2
-      },
-      turn: 3
-    }
-  ];
+  // 味方フィールドカード
+  createCard({
+    id: generateCardId('field', 'ally', 31),
+    name: '要塞',
+    type: 'ally',
+    category: 'field',
+    points: calculateCardPoints(BASE_POINTS.FIELD, 'ally', 3, 1, true),
+    effect: {
+      type: 'FIELD_UNIT_BUFF',
+      power: EFFECT_VALUES.FIELD,
+      range: 2,
+      pattern: 'diamond'
+    } as FieldEffect,
+    turn: 3
+  }),
+  createCard({
+    id: generateCardId('field', 'ally', 32),
+    name: '光の聖域',
+    type: 'ally',
+    category: 'field',
+    points: calculateCardPoints(BASE_POINTS.FIELD, 'ally', 3, 1, true),
+    effect: {
+      type: 'FIELD_UNIT_DEBUFF',
+      power: EFFECT_VALUES.FIELD,
+      range: 2,
+      pattern: 'diamond'
+    } as FieldEffect,
+    turn: 3
+  }),
+
+  // 敵フィールドカード
+  createCard({
+    id: generateCardId('field', 'enemy', 31),
+    name: '魔界門',
+    type: 'enemy',
+    category: 'field',
+    points: calculateCardPoints(BASE_POINTS.FIELD, 'enemy', 3, 1, true),
+    effect: {
+      type: 'FIELD_UNIT_BUFF',
+      power: EFFECT_VALUES.FIELD * 1.5,
+      range: 2,
+      pattern: 'diamond'
+    } as FieldEffect,
+    turn: 3
+  }),
+  createCard({
+    id: generateCardId('field', 'enemy', 32),
+    name: '闇の結界',
+    type: 'enemy',
+    category: 'field',
+    points: calculateCardPoints(BASE_POINTS.FIELD, 'enemy', 3, 1, true),
+    effect: {
+      type: 'FIELD_UNIT_DEBUFF',
+      power: EFFECT_VALUES.FIELD * 1.5,
+      range: 2,
+      pattern: 'diamond'
+    } as FieldEffect,
+    turn: 3
+  })
+];
