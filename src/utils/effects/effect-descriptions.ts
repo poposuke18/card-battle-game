@@ -124,7 +124,7 @@ import {
   }
   
   export function getFieldEffectDescription(effect: FieldEffect): string {
-    const rangeText = '範囲内の';
+    const rangeText = '◇範囲内の';
     const powerText = `${effect.power}`;
     return effect.type === 'FIELD_UNIT_BUFF'
       ? `${rangeText}味方ユニットを${powerText}強化`
@@ -132,7 +132,7 @@ import {
   }
   
   export function getSelfEffectDescription(effect: BaseEffect): string {
-    return `隣接する味方ユニット1体につき攻撃力+${effect.power || 0}`;
+    return `隣接する味方ユニット1体につき自信を${effect.power || 0}強化`;
   }
 
   export function getSupportEffectDescription(effect: SupportEffect): string {
@@ -146,7 +146,7 @@ import {
         const range = effect.range || 1;
         const multiplier = effect.effectMultiplier || 2;
         const powerBonus = effect.power || 0;
-        return `周囲${range}マスの武器カードの効果を${multiplier}倍に増幅し、基礎点を${powerBonus}上昇させる`;
+        return `周囲${range}マスの武器カードの効果を${multiplier}倍に増幅し、${powerBonus}強化z`;
       }
   
       default:
@@ -192,19 +192,19 @@ import {
         return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.secondaryEffect.range}マス以内の武器効果を${effect.secondaryEffect.effectMultiplier}倍に増幅`;
       
       case 'LEGENDARY_SAGE':
-        return `範囲${effect.fieldEffect.range}マスの味方を${effect.fieldEffect.allyBonus}強化、サポートを${effect.fieldEffect.supportBonus}強化し、隣接する味方の基礎点を${effect.healingEffect.power}回復`;
+        return `範囲${effect.fieldEffect.range}マスの味方を${effect.fieldEffect.allyBonus}強化、サポートを${effect.fieldEffect.supportBonus}強化し、隣接する味方のマイナス効果を無効化`;
       
       case 'LEGENDARY_DUAL_SWORDSMAN':
         return `縦横の味方を${effect.verticalEffect.power}強化し、敵を${Math.abs(effect.verticalEffect.debuff)}弱体化`;
       
         case 'LEGENDARY_CHAOS_DRAGON':
-          return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.fieldEffect.range}マスの敵に${Math.abs(effect.fieldEffect.enemyPenalty)}のダメージを与える`;
+          return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.fieldEffect.range}マスの敵ユニットを${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化`;
   
           case 'LEGENDARY_ARCHMAGE':
-            return `範囲${effect.fieldEffect.range}マスの味方を${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍に`;
+            return `範囲${effect.fieldEffect.range}マスの味方ユニットを${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍`;
     
             case 'LEGENDARY_DEMON_EMPEROR':
-              return `十字方向の味方を${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。
+              return `十字方向の味方ユニットを${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。
                       周囲${effect.selfEffect.range}マスの敵1体につき自身を${effect.selfEffect.powerPerEnemy}強化`;
       }
   }
@@ -212,8 +212,8 @@ import {
   export function getBossEffectDescription(effect: any): string {
     switch (effect.type) {
       case 'BOSS_IFRIT':
-        return `範囲${effect.primaryEffect.range}マス内の敵ユニットを${Math.abs(effect.primaryEffect.enemyPenalty)}弱体化し、
-                弱体化した敵1体につき自身を${effect.secondaryEffect.powerPerWeakened}強化する`;
+        return `◇範囲${effect.primaryEffect.range}マス内の敵ユニットを${Math.abs(effect.primaryEffect.enemyPenalty)}弱体化し、
+                範囲内の敵1体につき自身を${effect.secondaryEffect.powerPerWeakened}強化する`;
       // 他のボスの説明も必要に応じて追加
       default:
         return '強大な力を持つ';

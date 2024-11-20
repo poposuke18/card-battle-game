@@ -82,7 +82,7 @@ export function AnimatedCard({
             </div>
           </div>
 
-          {(card.effect?.type.startsWith('LEGENDARY_') || card.effect?.type.startsWith('BOSS_')) && (
+          {(card.effect?.type.startsWith('LEGENDARY_')) && (
             <motion.div
               className="absolute inset-0 pointer-events-none"
               animate={{
@@ -90,6 +90,19 @@ export function AnimatedCard({
               }}
               transition={{
                 duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          )}
+          {(card.effect?.type.startsWith('BOSS_')) && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{
+                boxShadow: ['0 0 12px rgba(255, 10, 10, 0.3)', '0 0 20px rgba(255, 10, 10, 0.5)', '0 0 12px rgba(255, 10, 10, 0.3)']
+              }}
+              transition={{
+                duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}

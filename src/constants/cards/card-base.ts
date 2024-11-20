@@ -25,7 +25,7 @@ export const TURN_GROWTH_RATE = {
   4: { ally: 1.4, enemy: 1.7 },   // 武器カード
   5: { ally: 1.6, enemy: 2.2 },   // 補強カード
   6: { ally: 1.8, enemy: 2.2 },   // リーダーカード
-  7: { ally: 2.2, enemy: 2.2 },   // 伝説カード
+  7: { ally: 3, enemy: 2.2 },   // 伝説カード
   8: { ally: 2.0, enemy: 2.5 }    // ボスカード
 } as const;
 

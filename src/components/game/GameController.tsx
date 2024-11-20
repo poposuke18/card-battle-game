@@ -11,6 +11,8 @@ import { useGameState } from '@/hooks/useGameState';
 import { useGameProgress } from '@/hooks/useGameProgress';  // 追加：ステージクリア用
 import { useEffects } from '@/hooks/useEffects';  // 追加：効果範囲表示用
 import type { PlacedCard, Position } from '@/types';
+import DebugCardList from '@/components/debug/DebugCardList';
+
 
 export function GameController() {
   const { gameState, actions } = useGameState();
@@ -90,6 +92,7 @@ export function GameController() {
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-red-400 mb-1">
             Card Battle Game
           </h1>
+          
           <p className="text-gray-400">戦略的に配置して勝利を目指そう！</p>
         </motion.div>
         

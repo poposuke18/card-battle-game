@@ -40,77 +40,86 @@ export function CardDetails({
       effectValue: number;
       effectType: string;
     }> = [];
-
-    if (card.card.effect?.type === 'LEADER_GUARDIAN_BOOST') {
-      const adjacentAllies = countAdjacentAllies(position, board, card.card.type);
-      const selfBoost = (card.card.effect.selfBoostPerAlly || 0) * adjacentAllies;
-      
-      if (selfBoost > 0) {
-        effects.push({
-          sourceCard: card,
-          sourcePosition: position,
-          effectValue: selfBoost,
-          effectType: 'SELF_BOOST',
-          description: `隣接する味方${adjacentAllies}体による強化`
-        });
-      }
-    }
-
-    if (card.card.effect?.type === 'LEADER_LANCER_BOOST') {
-      const horizontalEnemies = countHorizontalEnemies(position, board, card.card.type);
-      const selfBoost = (card.card.effect.selfBoostPerEnemy || 0) * horizontalEnemies;
-      
-      if (selfBoost > 0) {
-        effects.push({
-          sourceCard: card,
-          sourcePosition: position,
-          effectValue: selfBoost,
-          effectType: 'SELF_BOOST'
-        });
-      }
-    }
-
-    if (card.card.effect?.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
-      let adjacentAllies = 0;
-      const adjacentPositions = [
-        { row: position.row - 1, col: position.col }, // 上
-        { row: position.row + 1, col: position.col }, // 下
-        { row: position.row, col: position.col - 1 }, // 左
-        { row: position.row, col: position.col + 1 }, // 右
-      ];
-
-      adjacentPositions.forEach(pos => {
-        if (pos.row >= 0 && pos.row < board.length &&
-            pos.col >= 0 && pos.col < board[0].length) {
-          const adjacentCard = board[pos.row][pos.col];
-          if (adjacentCard && adjacentCard.card.type === card.card.type && adjacentCard.card.category === 'unit') {
-            adjacentAllies++;
-          }
+  
+    // 自身の効果の計算（伝説/ボス/特殊効果）
+    if (card.card.effect) {
+      const context = {
+        sourcePosition: position,
+        targetPosition: position,
+        sourceCard: card.card,
+        targetCard: card,
+        board
+      };
+  
+      // 伝説/ボスカードの自己効果
+      if (card.card.effect.type.startsWith('LEGENDARY_') || 
+          card.card.effect.type.startsWith('BOSS_')) {
+        const value = calculateEffectValue(context, card.card.effect);
+        if (value !== 0) {
+          effects.push({
+            sourceCard: card,
+            sourcePosition: position,
+            effectValue: value,
+            effectType: 'SELF_EFFECT'
+          });
         }
-      });
+      }
 
-      if (adjacentAllies > 0) {
-        effects.push({
-          sourceCard: card,
-          sourcePosition: position,
-          effectValue: adjacentAllies * (card.card.effect.power || 0)
-        });
+      else if (card.card.effect.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
+        const value = calculateEffectValue(context, card.card.effect);
+        if (value !== 0) {
+          effects.push({
+            sourceCard: card,
+            sourcePosition: position,
+            effectValue: value,
+            effectType: 'SELF_EFFECT_BASE'
+          });
+        }
+      }
+  
+      // リーダー効果の自己強化
+      else if (card.card.effect.type === 'LEADER_GUARDIAN_BOOST') {
+        const adjacentAllies = countAdjacentAllies(position, board, card.card.type);
+        const selfBoost = (card.card.effect.selfBoostPerAlly || 0) * adjacentAllies;
+        if (selfBoost > 0) {
+          effects.push({
+            sourceCard: card,
+            sourcePosition: position,
+            effectValue: selfBoost,
+            effectType: 'LEADER_SELF_BOOST',
+            description: `隣接する味方${adjacentAllies}体による強化`
+          });
+        }
+      }
+      else if (card.card.effect.type === 'LEADER_LANCER_BOOST') {
+        const horizontalEnemies = countHorizontalEnemies(position, board, card.card.type);
+        const selfBoost = (card.card.effect.selfBoostPerEnemy || 0) * horizontalEnemies;
+        if (selfBoost > 0) {
+          effects.push({
+            sourceCard: card,
+            sourcePosition: position,
+            effectValue: selfBoost,
+            effectType: 'LEADER_SELF_BOOST'
+          });
+        }
       }
     }
-
+  
+    // 他のカードからの効果を計算
     board.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         if (!cell || !cell.card.effect) return;
         if (rowIndex === position.row && colIndex === position.col) return;
-
-        const value = calculateEffectValue({
+  
+        const context = {
           sourcePosition: { row: rowIndex, col: colIndex },
           targetPosition: position,
           sourceCard: cell.card,
           targetCard: card,
           board
-        }, cell.card.effect);
-
+        };
+  
+        const value = calculateEffectValue(context, cell.card.effect);
         if (value !== 0) {
           effects.push({
             sourceCard: cell,
@@ -121,7 +130,7 @@ export function CardDetails({
         }
       });
     });
-
+  
     return effects;
   }, [board, position, card]);
 
@@ -249,13 +258,25 @@ export function CardDetails({
         )}
 
           {/* 武器効果倍率（武器カードの場合のみ表示） */}
-  {card.card.category === 'weapon' && (
+          {card.card.category === 'weapon' && (
     <div className="bg-yellow-500/10 rounded-lg p-3">
       <div className="text-sm font-semibold text-yellow-300 mb-2">武器効果倍率</div>
-      {incomingEffects.some(effect => effect.sourceCard.card.effect?.type === 'WEAPON_ENHANCEMENT') ? (
+      {incomingEffects.some(effect => 
+        effect.sourceCard.card.type === card.card.type && (  // 同じタイプ（味方/敵）のみ
+          effect.sourceCard.card.effect?.type === 'WEAPON_ENHANCEMENT' ||
+          effect.sourceCard.card.effect?.type === 'LEGENDARY_DRAGON_KNIGHT' ||
+          effect.sourceCard.card.effect?.type === 'LEGENDARY_ARCHMAGE'
+        )
+      ) ? (
         <div className="space-y-2">
           {incomingEffects
-            .filter(effect => effect.sourceCard.card.effect?.type === 'WEAPON_ENHANCEMENT')
+            .filter(effect => 
+              effect.sourceCard.card.type === card.card.type && (  // 同じタイプ（味方/敵）のみ
+                effect.sourceCard.card.effect?.type === 'WEAPON_ENHANCEMENT' ||
+                effect.sourceCard.card.effect?.type === 'LEGENDARY_DRAGON_KNIGHT' ||
+                effect.sourceCard.card.effect?.type === 'LEGENDARY_ARCHMAGE'
+              )
+            )
             .map((effect, index) => (
               <div key={index} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
@@ -265,7 +286,13 @@ export function CardDetails({
                   </span>
                 </div>
                 <span className="text-yellow-300">
-                  x{effect.sourceCard.card.effect?.effectMultiplier || 2}
+                  x{(effect.sourceCard.card.effect?.type === 'WEAPON_ENHANCEMENT' 
+                      ? effect.sourceCard.card.effect.effectMultiplier 
+                      : effect.sourceCard.card.effect?.type === 'LEGENDARY_DRAGON_KNIGHT'
+                        ? effect.sourceCard.card.effect.secondaryEffect?.effectMultiplier
+                        : effect.sourceCard.card.effect?.type === 'LEGENDARY_ARCHMAGE'
+                          ? effect.sourceCard.card.effect.weaponEffect?.effectMultiplier
+                          : 2)}
                 </span>
               </div>
             ))}
@@ -281,50 +308,89 @@ export function CardDetails({
   <div className="bg-gray-800/50 rounded-lg p-3">
     <div className="text-sm font-semibold mb-2">受けている効果:</div>
     <div className="space-y-2">
-      {incomingEffects.map((effect, index) => {
-        const style = effect.sourceCard.card.effect 
-          ? getEffectStyle(effect.sourceCard.card.effect)
-          : null;
-          if (effect.effectType === 'SELF_BOOST') {
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center justify-between text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 opacity-70" />
-                  <span>自己強化（横方向の敵による）</span>
-                </div>
-                <span className="text-green-400">+{effect.effectValue}</span>
-              </motion.div>
-            );
-          }
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center justify-between text-sm"
-            >
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{
-                        backgroundColor: style?.color,
-                        opacity: style?.intensity
-                      }} />
-                      <span>{effect.sourceCard.card.name}</span>
-                      <span className="text-gray-500">
-                        ({effect.sourcePosition.row + 1}, {effect.sourcePosition.col + 1})
-                      </span>
-                    </div>
-                    <span className={effect.effectValue > 0 ? 'text-green-400' : 'text-red-400'}>
-                      {effect.effectValue > 0 ? '+' : ''}{effect.effectValue}
-                    </span>
-                  </motion.div>
-                );
-              })}
+    {incomingEffects.map((effect, index) => {
+  const style = effect.sourceCard.card.effect 
+    ? getEffectStyle(effect.sourceCard.card.effect)
+    : null;
+  
+  // 自己効果の表示
+  if (effect.effectType === 'SELF_EFFECT') {
+    return (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex items-center justify-between text-sm"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-yellow-500 opacity-70" />
+          <span>自己効果</span>
+        </div>
+        <span className="text-yellow-400">+{effect.effectValue}</span>
+      </motion.div>
+    );
+  }
+
+  if (effect.effectType === 'SELF_EFFECT_BASE') {
+    return (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex items-center justify-between text-sm"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-yellow-500 opacity-70" />
+          <span>自己効果</span>
+        </div>
+        <span className="text-yellow-400">+{effect.effectValue}</span>
+      </motion.div>
+    );
+  }
+
+  // リーダー自己強化の表示
+  if (effect.effectType === 'LEADER_SELF_BOOST') {
+    return (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex items-center justify-between text-sm"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-purple-500 opacity-70" />
+          <span>{effect.description || 'リーダー効果'}</span>
+        </div>
+        <span className="text-purple-400">+{effect.effectValue}</span>
+      </motion.div>
+    );
+  }
+
+  // その他の効果の表示（既存のコード）
+  return (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className="flex items-center justify-between text-sm"
+    >
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full" style={{
+          backgroundColor: style?.color,
+          opacity: style?.intensity
+        }} />
+        <span>{effect.sourceCard.card.name}</span>
+        <span className="text-gray-500">
+          ({effect.sourcePosition.row + 1}, {effect.sourcePosition.col + 1})
+        </span>
+      </div>
+      <span className={effect.effectValue > 0 ? 'text-green-400' : 'text-red-400'}>
+        {effect.effectValue > 0 ? '+' : ''}{effect.effectValue}
+      </span>
+    </motion.div>
+  );
+})}
             </div>
           </div>
         )}

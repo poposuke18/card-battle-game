@@ -13,7 +13,7 @@ function calculateBossPoints(basePoint: number, stage: number): number {
 // ステージ1のボス：イフリート（炎の精霊王）
 const STAGE1_BOSS: Card = createCard({
   id: generateCardId('unit', 'enemy', 81),
-  name: '炎精霊王イフリート',
+  name: '炎神イフリート',
   type: 'enemy',
   category: 'unit',
   class: 'mage',

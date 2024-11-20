@@ -13,7 +13,7 @@ export const TURN7_CARDS: Card[] = [
   // 味方伝説ユニット
   createCard({
     id: generateCardId('unit', 'ally', 71),
-    name: '聖騎士ランスロット',
+    name: '聖騎士アーサ',
     type: 'ally',
     category: 'unit',
     class: 'knight',
@@ -27,7 +27,7 @@ export const TURN7_CARDS: Card[] = [
       secondaryEffect: {
         type: 'WEAPON_ENHANCEMENT',
         range: 2,
-        effectMultiplier: 1.5
+        effectMultiplier: 2
       },
       description: '円卓の騎士の力で隣接する味方を強化し、武器の効力を高める'
     },
@@ -44,33 +44,33 @@ export const TURN7_CARDS: Card[] = [
       type: 'LEGENDARY_SAGE',
       fieldEffect: {
         range: 2,
-        allyBonus: EFFECT_VALUES.FIELD,
+        allyBonus: EFFECT_VALUES.FIELD *2,
         supportBonus: EFFECT_VALUES.FIELD
       },
-      healingEffect: {
-        power: 30,
-        range: 1
+      nullifyEffect: {
+        range: 1,
+        type: 'DEBUFF_NULLIFICATION'
       },
-      description: '生命の魔法で味方を癒し、古代の知恵で支援を強化する'
+      description: '生命の魔法で味方を強化し、隣接する味方のマイナス効果を無効化する'
     },
     turn: 7
   }),
   createCard({
     id: generateCardId('unit', 'ally', 73),
-    name: '双剣士ラウルファ',
+    name: '双剣士ウルファ',
     type: 'ally',
     category: 'unit',
     class: 'warrior',
-    points: calculateLegendaryPoints(BASE_POINTS.UNIT.warrior, 'ally'),
+    points: calculateLegendaryPoints(BASE_POINTS.UNIT.warrior * 1.5, 'ally'),
     effect: {
       type: 'LEGENDARY_DUAL_SWORDSMAN',
       verticalEffect: {
         power: EFFECT_VALUES.VERTICAL * 1.5,
-        debuff: -EFFECT_VALUES.VERTICAL
+        debuff: -EFFECT_VALUES.VERTICAL *2
       },
       horizontalEffect: {
         power: EFFECT_VALUES.HORIZONTAL * 2,
-        debuff: -EFFECT_VALUES.HORIZONTAL
+        debuff: -EFFECT_VALUES.HORIZONTAL *2
       },
       description: '伝説の二刀流で縦横無尽に戦場を駆ける'
     },
@@ -80,7 +80,7 @@ export const TURN7_CARDS: Card[] = [
   // 敵伝説ユニット
   createCard({
     id: generateCardId('unit', 'enemy', 71),
-    name: '冥竜皇帝ヴァルガス',
+    name: '冥皇帝ヴァルガ',
     type: 'enemy',
     category: 'unit',
     class: 'knight',
@@ -89,7 +89,7 @@ export const TURN7_CARDS: Card[] = [
       type: 'LEGENDARY_CHAOS_DRAGON',
       primaryEffect: {
         type: 'CROSS_FORMATION',
-        power: EFFECT_VALUES.ADJACENT * 2.5
+        power: EFFECT_VALUES.ADJACENT * 2
       },
       fieldEffect: {
         range: 2,
@@ -101,7 +101,7 @@ export const TURN7_CARDS: Card[] = [
   }),
   createCard({
     id: generateCardId('unit', 'enemy', 72),
-    name: '深淵術師ネクロス',
+    name: '深淵術師ネクロ',
     type: 'enemy',
     category: 'unit',
     class: 'mage',
@@ -110,7 +110,7 @@ export const TURN7_CARDS: Card[] = [
       type: 'LEGENDARY_ARCHMAGE',
       fieldEffect: {
         range: 2,
-        allyBonus: EFFECT_VALUES.FIELD * 1.5,
+        allyBonus: EFFECT_VALUES.FIELD ,
         enemyPenalty: -EFFECT_VALUES.FIELD
       },
       weaponEffect: {
@@ -123,7 +123,7 @@ export const TURN7_CARDS: Card[] = [
   }),
   createCard({
     id: generateCardId('unit', 'enemy', 73),
-    name: '暗黒戦士ヴァロン',
+    name: '暗黒戦士ザロン',
     type: 'enemy',
     category: 'unit',
     class: 'warrior',
@@ -131,11 +131,11 @@ export const TURN7_CARDS: Card[] = [
     effect: {
       type: 'LEGENDARY_DEMON_EMPEROR',
       crossEffect: {
-        allyBonus: EFFECT_VALUES.ADJACENT * 2,
+        allyBonus: EFFECT_VALUES.ADJACENT * 1.5,
         enemyPenalty: -EFFECT_VALUES.ADJACENT
       },
       selfEffect: {
-        powerPerEnemy: 30,
+        powerPerEnemy: 10,
         range: 2
       },
       description: '暗黒の力で敵を圧倒し、その力を糧に更なる強さを得る'

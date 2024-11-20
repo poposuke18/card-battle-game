@@ -81,34 +81,95 @@ export function calculateCardEffects(
 
   // 自身の効果の計算
   if (targetCard.card.effect) {
-    if (targetCard.card.effect.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
-      const adjacentAllies = countAdjacentAllies(position, board, targetCard.card.type);
-      const powerUp = (targetCard.card.effect.power || 0) * adjacentAllies;
-      
-      if (powerUp > 0) {
-        results.push({
-          effect: targetCard.card.effect,
-          value: powerUp,
-          source: targetCard.card
-        });
-      }
-    } else {
-      const context = {
-        sourcePosition: position,
-        targetPosition: position,
-        sourceCard: targetCard.card,
-        targetCard,
-        board
-      };
+    const context = {
+      sourcePosition: position,
+      targetPosition: position,
+      sourceCard: targetCard.card,
+      targetCard,
+      board
+    };
 
-      if (checkEffectConditions(context, targetCard.card.effect)) {
-        const value = calculateEffectValue(context, targetCard.card.effect);
-        if (value !== 0) {
+    // 効果タイプに応じた処理
+    switch (targetCard.card.effect.type) {
+      case 'SELF_POWER_UP_BY_ADJACENT_ALLY': {
+        const adjacentAllies = countAdjacentAllies(position, board, targetCard.card.type);
+        const powerUp = (targetCard.card.effect.power || 0) * adjacentAllies;
+        
+        if (powerUp > 0) {
           results.push({
             effect: targetCard.card.effect,
-            value,
+            value: powerUp,
             source: targetCard.card
           });
+        }
+        break;
+      }
+
+      // 伝説カードの自己効果
+      case 'LEGENDARY_DRAGON_KNIGHT':
+      case 'LEGENDARY_SAGE':
+      case 'LEGENDARY_DUAL_SWORDSMAN':
+      case 'LEGENDARY_CHAOS_DRAGON':
+      case 'LEGENDARY_ARCHMAGE':
+      case 'LEGENDARY_DEMON_EMPEROR': {
+        if (checkEffectConditions(context, targetCard.card.effect)) {
+          const value = calculateEffectValue(context, targetCard.card.effect);
+          if (value !== 0) {
+            results.push({
+              effect: targetCard.card.effect,
+              value,
+              source: targetCard.card
+            });
+          }
+        }
+        break;
+      }
+
+      // ボスカードの自己効果
+      case 'BOSS_IFRIT':
+      case 'BOSS_BAHAMUT':
+      case 'BOSS_LEVIATHAN':
+      case 'BOSS_ODIN': {
+        if (checkEffectConditions(context, targetCard.card.effect)) {
+          const value = calculateEffectValue(context, targetCard.card.effect);
+          if (value !== 0) {
+            results.push({
+              effect: targetCard.card.effect,
+              value,
+              source: targetCard.card
+            });
+          }
+        }
+        break;
+      }
+
+      // リーダーの自己効果
+      case 'LEADER_GUARDIAN_BOOST':
+      case 'LEADER_LANCER_BOOST': {
+        if (checkEffectConditions(context, targetCard.card.effect) && targetCard.card.category === 'unit') {
+          const value = calculateEffectValue(context, targetCard.card.effect);
+          if (value !== 0) {
+            results.push({
+              effect: targetCard.card.effect,
+              value,
+              source: targetCard.card
+            });
+          }
+        }
+        break;
+      }
+
+      // その他の効果
+      default: {
+        if (checkEffectConditions(context, targetCard.card.effect)) {
+          const value = calculateEffectValue(context, targetCard.card.effect);
+          if (value !== 0) {
+            results.push({
+              effect: targetCard.card.effect,
+              value,
+              source: targetCard.card
+            });
+          }
         }
       }
     }
@@ -128,8 +189,21 @@ export function calculateCardEffects(
         board
       };
 
+      // エレミアの保護効果下ではマイナス効果を無効化
+      const hasSageProtection = 
+        sourceCell.card.effect.type === 'LEGENDARY_SAGE' &&
+        calculateManhattanDistance(context.sourcePosition, context.targetPosition) === 1 &&
+        targetCard.card.type === sourceCell.card.type &&
+        targetCard.card.category === 'unit';
+
       if (checkEffectConditions(context, sourceCell.card.effect)) {
-        const value = calculateEffectValue(context, sourceCell.card.effect);
+        let value = calculateEffectValue(context, sourceCell.card.effect);
+        
+        // エレミアの保護効果があればマイナス効果を0に
+        if (hasSageProtection && value < 0) {
+          value = 0;
+        }
+
         if (value !== 0) {
           results.push({
             effect: sourceCell.card.effect,
@@ -472,13 +546,34 @@ export function getEffectRange(card: Card, position: Position): Position[] {
 export function calculateEffectValue(context: EffectContext, effect: Effect | null): number {
   if (!effect || !checkEffectConditions(context, effect)) return 0;
 
+  // エレミアの隣接効果チェック（マイナス効果を無効化）
+  const targetCard = context.targetCard;
+  const hasSageProtection = context.board.some((row, rowIndex) => {
+    return row.some((cell, colIndex) => {
+      if (!cell?.card.effect || cell.card.effect.type !== 'LEGENDARY_SAGE') return false;
+      
+      // エレミアとの距離を計算
+      const distance = calculateManhattanDistance(
+        { row: rowIndex, col: colIndex },
+        context.targetPosition
+      );
+
+      // 隣接していて、かつ味方のユニットである場合
+      return distance === 1 && 
+             cell.card.type === targetCard.card.type &&
+             targetCard.card.category === 'unit';
+    });
+  });
+
   let value = 0;
 
   if (effect.type.startsWith('BOSS_')) {
     value = calculateBossEffectValue(context, effect as BossEffect);
   } else if (effect.type.startsWith('LEGENDARY_')) {
     value = calculateLegendaryEffectValue(context, effect as LegendaryEffect);
-  } else if (isFieldEffect(effect)) {
+  
+  }
+   else if (isFieldEffect(effect)) {
     value = calculateFieldEffectValue(context, effect);
   } else if ('targetClass' in effect) {
     value = calculateWeaponEffectValue(context, effect);
@@ -488,6 +583,11 @@ export function calculateEffectValue(context: EffectContext, effect: Effect | nu
     value = calculateSupportEffectValue(context, effect as SupportEffect);
   } else {
     value = calculateBaseEffectValue(context, effect as BaseEffect);
+  }
+
+  // エレミアの保護効果がある場合、マイナス効果を0にする
+  if (hasSageProtection && value < 0) {
+    value = 0;
   }
 
   return value * calculateEffectMultiplier(context);
@@ -885,6 +985,7 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
   switch (effect.type) {
     case 'LEGENDARY_DRAGON_KNIGHT': {
       // 隣接効果の計算
+      
       if (isAdjacent(sourcePosition, targetPosition)) {
         if (isSameType(sourceCard, targetCard.card) && targetCard.card.category === 'unit') {
           return effect.primaryEffect.power;
@@ -903,7 +1004,9 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
     case 'LEGENDARY_SAGE': {
       const distance = calculateManhattanDistance(sourcePosition, targetPosition);
       
-      // 範囲2マス内の効果
+      if (sourcePosition.row === targetPosition.row && 
+        sourcePosition.col === targetPosition.col) return 0;
+      // 範囲2マス内の通常の強化効果
       if (distance <= effect.fieldEffect.range) {
         if (isSameType(sourceCard, targetCard.card)) {
           if (targetCard.card.category === 'support') {
@@ -912,13 +1015,8 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
           return effect.fieldEffect.allyBonus;
         }
       }
-
-      // 隣接マスの回復効果
-      if (distance === 1 && isSameType(sourceCard, targetCard.card)) {
-        return effect.healingEffect.power;
-      }
-
-      return 0;
+    
+      return 0;  // マイナス効果の無効化は別途処理
     }
 
     case 'LEGENDARY_DUAL_SWORDSMAN': {
@@ -956,10 +1054,13 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
       const distance = calculateManhattanDistance(sourcePosition, targetPosition);
       
       // 範囲効果
+
+      if (sourcePosition.row === targetPosition.row && 
+        sourcePosition.col === targetPosition.col) return 0;
       if (distance <= effect.fieldEffect.range) {
-        if (isSameType(sourceCard, targetCard.card)) {
+        if (isSameType(sourceCard, targetCard.card)&& targetCard.card.category === 'unit') {
           return effect.fieldEffect.allyBonus;
-        } else {
+        } else if( targetCard.card.category === 'unit') {
           return effect.fieldEffect.enemyPenalty;
         }
       }
@@ -1004,12 +1105,14 @@ function calculateEffectMultiplier(context: EffectContext): number {
   const { sourceCard, sourcePosition, board } = context;
   let multiplier = 1;
 
-  // 武器カードの場合のみ、武器職人の効果を適用
+  // 武器カードの場合のみ、武器強化効果を適用
   if (sourceCard.category === 'weapon') {
     board.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         if (!cell?.card.effect) return;
+        if (cell.card.type !== sourceCard.type) return;  // 同じタイプ（味方/敵）のみ
         
+        // WEAPON_ENHANCEMENTの直接の効果
         if (cell.card.effect.type === 'WEAPON_ENHANCEMENT') {
           const distance = calculateManhattanDistance(
             sourcePosition,
@@ -1017,8 +1120,30 @@ function calculateEffectMultiplier(context: EffectContext): number {
           );
           
           if (distance <= (cell.card.effect.range || 1)) {
-            // 効果の倍率を適用（デフォルトは2倍）
             multiplier *= cell.card.effect.effectMultiplier || 2;
+          }
+        }
+        
+        // 伝説カードの武器強化効果
+        if (cell.card.effect.type === 'LEGENDARY_DRAGON_KNIGHT') {
+          const distance = calculateManhattanDistance(
+            sourcePosition,
+            { row: rowIndex, col: colIndex }
+          );
+          
+          if (distance <= (cell.card.effect.secondaryEffect?.range || 2)) {
+            multiplier *= cell.card.effect.secondaryEffect?.effectMultiplier || 2;
+          }
+        }
+        
+        if (cell.card.effect.type === 'LEGENDARY_ARCHMAGE') {
+          const distance = calculateManhattanDistance(
+            sourcePosition,
+            { row: rowIndex, col: colIndex }
+          );
+          
+          if (distance <= (cell.card.effect.weaponEffect?.range || 2)) {
+            multiplier *= cell.card.effect.weaponEffect?.effectMultiplier || 2;
           }
         }
       });
