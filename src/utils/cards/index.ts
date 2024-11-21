@@ -28,7 +28,7 @@ import type { Card, CardType } from '@/types';
   export type TurnNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;  // 7と8を追加
   
   // ターンに応じたカードプールを取得する関数を追加
-  function getTurnCards(turn: TurnNumber, stage: number): Card[] {
+  function getTurnCards(turn: TurnNumber): Card[] {
     switch (turn) {
       case 1: return TURN1_CARDS;
       case 2: return TURN2_CARDS;
@@ -37,7 +37,7 @@ import type { Card, CardType } from '@/types';
       case 5: return TURN5_CARDS;
       case 6: return TURN6_CARDS;
       case 7: return TURN7_CARDS;
-      case 8: return [];  // ボスカードは generateHandWithStageBonus で直接処理
+      case 8: return [];
       default: return [];
     }
   }
@@ -77,7 +77,7 @@ export function generateHandWithStageBonus(turn: TurnNumber, stage: number): Car
     }
 
     // 通常のカード生成処理
-    const baseCards = getTurnCards(turn, stage);
+    const baseCards = getTurnCards(turn);
     const alliedCards = filterCardsByType(baseCards, 'ally');
     const enemyCards = filterCardsByType(baseCards, 'enemy');
     

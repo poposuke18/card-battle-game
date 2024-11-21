@@ -3,7 +3,7 @@
 import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type TooltipProps = {
+export type TooltipProps = {
   content: React.ReactNode;
   children: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';

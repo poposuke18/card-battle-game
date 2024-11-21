@@ -1,8 +1,8 @@
 // src/utils/performance/cache.ts
 
 type CacheKey = string;
-type CacheValue = any;
-type CacheOptions = {
+type CacheValue = string | number | boolean | object | null;
+export type CacheOptions = {
   maxSize?: number;
   ttl?: number;  // Time to live in milliseconds
 };
@@ -24,8 +24,7 @@ class Cache {
   set(key: CacheKey, value: CacheValue): void {
     this.cleanStaleEntries();
 
-    if (this.cache.size >= this.maxSize) {
-      const oldestKey = this.cache.keys().next().value;
+    if (this.cache.size >= this.maxSize && oldestKey) {
       this.cache.delete(oldestKey);
     }
 

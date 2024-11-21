@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type TurnTransitionProps = {
+export type TurnTransitionProps = {
   turn: number;
   isVisible: boolean;
 };

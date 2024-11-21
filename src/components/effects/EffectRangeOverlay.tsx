@@ -12,9 +12,7 @@ type EffectRangeOverlayProps = {
 };
 
 export const EffectRangeOverlay = memo(({
-  card,
-  position,
-  board
+  card
 }: EffectRangeOverlayProps) => {
   if (!card.card.effect) return null;
 
@@ -24,7 +22,7 @@ export const EffectRangeOverlay = memo(({
   // エフェクトの種類に応じたパターンのSVG定義
   const getPatternSvg = () => {
     switch (pattern) {
-      case 'vertical':
+      case 'VERTICAL':
         return (
           <pattern 
             id="verticalPattern" 
@@ -40,7 +38,7 @@ export const EffectRangeOverlay = memo(({
             />
           </pattern>
         );
-      case 'horizontal':
+      case 'HORIZONTAL':
         return (
           <pattern 
             id="horizontalPattern" 
@@ -56,7 +54,7 @@ export const EffectRangeOverlay = memo(({
             />
           </pattern>
         );
-      case 'diagonal':
+      case 'DIAGONAL':
         return (
           <pattern 
             id="diagonalPattern" 
@@ -72,7 +70,7 @@ export const EffectRangeOverlay = memo(({
             />
           </pattern>
         );
-      case 'cross':
+      case 'CROSS':
         return (
           <pattern 
             id="crossPattern" 

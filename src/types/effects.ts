@@ -1,11 +1,14 @@
 // src/types/effects.ts
 
 import type { UnitClass, Direction, EffectType, CardCategory } from './base';
+import type { Position, PlacedCard, Card } from '@/types';
+
 
 export type BaseEffectType = 
   | 'SELF_POWER_UP_BY_ENEMY_LINE'
   | 'SELF_POWER_UP_BY_ADJACENT_ALLY'
   | 'ADJACENT_UNIT_BUFF'
+  | 'ADJACENT_VERTICAL_BOOST'
   | 'ADJACENT_UNIT_DEBUFF'
   | 'ROW_COLUMN_BUFF'
   | 'FIELD_CLASS_POWER_UP'
@@ -26,6 +29,7 @@ export type LeaderEffectType =
   | 'LEADER_TACTICAL'
   | 'LEADER_ENHANCEMENT'
   | 'LEADER_PROTECTION'
+  |'LEADER_ARCHER_DEBUFF'
   | 'LEADER_DEBUFF'
   | 'LEADER_DIAGONAL_EFFECT'
   | 'LEADER_GUARDIAN_BOOST'
@@ -47,6 +51,12 @@ export type LeaderEffectType =
   | 'LEGENDARY_CHAOS_DRAGON'
   | 'LEGENDARY_ARCHMAGE'
   | 'LEGENDARY_DEMON_EMPEROR';
+
+  export type BossEffectType = 
+  | 'BOSS_IFRIT'
+  | 'BOSS_BAHAMUT'
+  | 'BOSS_LEVIATHAN'
+  | 'BOSS_ODIN';
 
 
 export type BaseEffect = {
@@ -74,22 +84,42 @@ export type FieldEffect = {
 
 export type SupportEffect = {
   type: SupportEffectType;
-  power?: number;            // 基本効果値
-  targetDirection?: 'vertical' | 'horizontal'; // 効果方向
-  range?: number;            // 効果範囲
-  effectMultiplier?: number; // 効果倍率
+  power?: number;
+  targetDirection?: 'vertical' | 'horizontal';
+  range?: number;
+  effectMultiplier?: number;
 };
 
 export type WeaponEffect = {
   type: WeaponEffectType;
-  targetClass: UnitClass;  // 単一クラスのみに
+  targetClass: UnitClass;
   power: number;
+  targetClasses?: UnitClass[]; // 複数クラスに対応する場合
 };
 
 export type LeaderEffect = {
   type: LeaderEffectType;
-  power?: number;
+  // 共通のプロパティ
   range?: number;
+  power?: number;
+  
+  // LEADER_ARCHER_DEBUFF用
+  basePenalty?: number;
+  weaponPenalty?: number;
+  
+  // LEADER_GUARDIAN_BOOST用
+  selfBoostPerAlly?: number;
+  allyBonus?: number;
+  
+  // LEADER_LANCER_BOOST用
+  selfBoostPerEnemy?: number;
+  targetDirection?: 'horizontal' | 'vertical';
+  
+  // LEADER_MAGE_EFFECT用
+  enemyPenalty?: number;
+  supportBonus?: number;
+  
+  // その他のオプショナルプロパティ
   supportMultiplier?: number;
   categoryBonus?: {
     weapon?: number;
@@ -101,34 +131,40 @@ export type LeaderEffect = {
     power: number;
   }>;
   targetClass?: UnitClass;
-  allyBonus?: number;
-  enemyPenalty?: number;
-  powerPerEnemy?: number;
-  selfBoostPerAlly?: number;
-  supportBonus?: number;
   adjacentAllyBonus?: number;
   adjacentEnemyPenalty?: number;
 };
 
-export type LegendaryEffect = {
-  type: LegendaryEffectType;
+export type EffectDetails = {
+  type: string;
+  effectType: 'base' | 'weapon' | 'leader' | 'field' | 'legendary' | 'boss' | 'support';
   description: string;
-  primaryEffect?: {
+  range: Position[];
+  pattern?: string;
+};
+
+export type EffectWithType = BaseEffect | WeaponEffect | LeaderEffect | LegendaryEffect | BossEffect | SupportEffect;
+
+
+export type LegendaryEffect = {
+  type: LegendaryEffectType;  // This should match the LegendaryEffectType union
+  description: string;
+  primaryEffect: {
     type: string;
     power: number;
     range?: number;
   };
-  secondaryEffect?: {
+  secondaryEffect: {
     type: string;
     power?: number;
-    range?: number;
-    effectMultiplier?: number;
-  };
-  fieldEffect?: {
     range: number;
-    allyBonus?: number;
-    enemyPenalty?: number;
-    supportBonus?: number;
+    effectMultiplier: number;
+  };
+  fieldEffect: {
+    range: number;
+    allyBonus: number;
+    enemyPenalty: number;
+    supportBonus: number;
   };
   healingEffect?: {
     power: number;
@@ -138,15 +174,19 @@ export type LegendaryEffect = {
     power: number;
     debuff: number;
   };
-  horizontalEffect?: {
+  weaponEffect: {  // これを追加
+    range: number;
+    effectMultiplier: number;
+  };
+  horizontalEffect: {
     power: number;
     debuff: number;
   };
-  crossEffect?: {
+  crossEffect: {
     allyBonus: number;
     enemyPenalty: number;
   };
-  selfEffect?: {
+  selfEffect: {
     powerPerEnemy: number;
     range: number;
   };
@@ -165,6 +205,34 @@ export type EffectResult = {
   affected: Position[];
 };
 
+export type BossEffect = {
+  type: BossEffectType;
+  primaryEffect: {
+    range?: number;
+    enemyPenalty?: number;
+    pattern?: string;
+    allyBonus?: number;
+    weaponNullification?: boolean;
+    description?: string;
+  };
+  secondaryEffect: {
+    powerPerWeakened?: number;
+    allyBoost?: number;
+    targetDirection?: string;
+    description?: string;
+  };
+  ultimateEffect?: {
+    name?: string;
+    damage?: number;
+    pattern?: string;
+    description?: string;
+    power?: number;
+    targetDirection?: string;
+    effectNullification?: boolean;
+  };
+  description?: string;
+};
+
 export function isFieldEffect(effect: Effect): effect is FieldEffect {
   return (effect as FieldEffect).pattern === 'diamond';
 }
@@ -174,5 +242,7 @@ export type Effect =
   | WeaponEffect 
   | LeaderEffect 
   | FieldEffect 
-  | SupportEffect
+  | SupportEffect 
+  | BossEffect
   | LegendaryEffect;
+

@@ -1,6 +1,6 @@
 // src/utils/score/index.ts
 
-export { calculateScore } from './calculator';
+export { calculateCardScore } from './calculator';
 export type {
   ScoreBreakdown,
   ScoreModifier,

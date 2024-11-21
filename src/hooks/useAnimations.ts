@@ -16,8 +16,7 @@ export function useAnimations() {
 
   // カードの配置アニメーション
   const animateCardPlacement = useCallback(async (
-    cardId: string,
-    position: Position
+    cardId: string
   ) => {
     setAnimatingCards(prev => new Set(prev).add(cardId));
     
@@ -52,19 +51,15 @@ export function useAnimations() {
   }, []);
 
   // スコア変動アニメーション
-  const animateScoreChange = useCallback(async (
-    position: Position,
-    oldScore: number,
-    newScore: number
-  ) => {
+  const animateScoreChange = useCallback(async () => {
     setAnimationState({
       isAnimating: true,
       type: 'score',
       duration: 300
     });
-
+  
     await new Promise(resolve => setTimeout(resolve, 300));
-
+  
     setAnimationState({
       isAnimating: false,
       type: '',

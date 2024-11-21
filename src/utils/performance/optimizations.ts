@@ -64,81 +64,63 @@ export function useEffectCalculation(
 ) {
   return useMemo(() => {
     if (!effect) return null;
-
-    // 効果の計算処理...
-    // 実際の効果計算ロジックをここに移動
-    
     return {
-      value: 0, // 計算された効果値
-      targets: [] as Position[] // 影響を受ける位置
+      value: 0,
+      targets: [] as Position[]
     };
-  }, [sourceCard.id, targetPosition.row, targetPosition.col, board, effect]);
+  }, [effect]);
 }
 
-// スコアの計算をメモ化
-export function useScoreCalculation(board: (PlacedCard | null)[][]) {
-  return useMemo(() => {
-    let allyScore = 0;
-    let enemyScore = 0;
-
-    board.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
-        if (!cell) return;
-        
-        // スコア計算ロジック...
-        // 実際のスコア計算処理をここに移動
-      });
-    });
-
-    return { allyScore, enemyScore };
-  }, [board]);
-}
 
 // キャッシュされた位置計算
 type PositionCache = {
-  [key: string]: Position[];
+  adjacent: { [key: string]: Position[] };
+  diagonal: { [key: string]: Position[] };
+  range: { [key: string]: Position[] };
 };
 
-export function createPositionCache(): PositionCache {
-  const cache: PositionCache = {};
-
-  function cacheKey(type: string, params: any): string {
-    return `${type}-${JSON.stringify(params)}`;
-  }
+export function createPositionCache() {
+  const cache: PositionCache = {
+    adjacent: {},
+    diagonal: {},
+    range: {}
+  };
 
   return {
     getAdjacentPositions(position: Position): Position[] {
-      const key = cacheKey('adjacent', position);
-      if (!cache[key]) {
-        cache[key] = calculateAdjacentPositions(position);
+      const key = JSON.stringify(position);
+      if (!cache.adjacent[key]) {
+        cache.adjacent[key] = calculateAdjacentPositions(position);
       }
-      return cache[key];
+      return cache.adjacent[key];
     },
 
     getDiagonalPositions(position: Position): Position[] {
-      const key = cacheKey('diagonal', position);
-      if (!cache[key]) {
-        cache[key] = calculateDiagonalPositions(position);
+      const key = JSON.stringify(position);
+      if (!cache.diagonal[key]) {
+        cache.diagonal[key] = calculateDiagonalPositions(position);
       }
-      return cache[key];
+      return cache.diagonal[key];
     },
 
     getRangePositions(position: Position, range: number): Position[] {
-      const key = cacheKey('range', { position, range });
-      if (!cache[key]) {
-        cache[key] = calculateRangePositions(position, range);
+      const key = `${JSON.stringify(position)}-${range}`;
+      if (!cache.range[key]) {
+        cache.range[key] = calculateRangePositions(position, range);
       }
-      return cache[key];
+      return cache.range[key];
     },
 
-    clearCache() {
-      Object.keys(cache).forEach(key => delete cache[key]);
+    clearCache(): void {
+      cache.adjacent = {};
+      cache.diagonal = {};
+      cache.range = {};
     }
   };
 }
 
 // DOM更新の最適化
-export function useDebouncedCallback<T extends (...args: any[]) => void>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
   callback: T,
   delay: number
 ): T {

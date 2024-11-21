@@ -4,7 +4,7 @@ export {
     usePerformanceMonitor,
     useBoardChanges,
     useEffectCalculation,
-    useScoreCalculation,
+    createPositionCache,
     useDebouncedCallback,
     useAnimationFrame
   } from './optimizations';

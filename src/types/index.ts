@@ -29,9 +29,17 @@ export type {
     BaseEffectType,
     WeaponEffectType,
     LeaderEffectType,
+    LegendaryEffectType,
+    SupportEffect,
+    BossEffect,
+    BossEffectType,
+    EffectDetails,
+    LegendaryEffect,
     FieldEffectType,  // 追加
     FieldEffect, 
     EffectContext,
+    EffectWithType,
+    Effect,
     EffectResult
   } from './effects';
   
@@ -44,7 +52,23 @@ export type {
     GameHistory,
     TurnData,
     GameSettings,
+    GameProgress,
     GameStats
   } from './game';
+
+  export type ScoreDetails = {
+    basePoints: number;
+    effectPoints: number;
+    leaderEffectPoints: number;
+    weaponEffectPoints: number;
+    fieldEffectPoints: number;
+    supportEffectPoints: number;
+    totalPoints: number;
+    effectBreakdown: Array<{
+      type: string;
+      value: number;
+      source: string;
+    }>;
+  };
 
   export { isFieldEffect } from './effects';  // 型ガード関数のエクスポート

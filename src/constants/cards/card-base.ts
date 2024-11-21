@@ -1,6 +1,6 @@
 // src/constants/cards/card-base.ts
 
-import type { Card, CardType, CardCategory, UnitClass } from '@/types';
+import type { Card, CardType, CardCategory} from '@/types';
 
 // カードの基本ポイント
 export const BASE_POINTS = {

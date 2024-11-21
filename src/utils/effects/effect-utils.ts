@@ -1,6 +1,6 @@
 // src/utils/effects/effect-utils.ts
 
-import type { Position } from '@/types';
+import type { Effect, Position,PlacedCard } from '@/types';
 
 export function isValidPosition(position: Position, boardSize: number): boolean {
   return position.row >= 0 && 
@@ -61,7 +61,7 @@ export function getEffectMultiplier(
   const { sourcePosition, board } = context;
   let multiplier = 1;
 
-  board.forEach((row, rowIndex) => {
+  board.forEach((row: PlacedCard[], rowIndex: number) => {
     row.forEach((cell, colIndex) => {
       if (!cell?.card.effect) return;
       const distance = getDistance(sourcePosition, { row: rowIndex, col: colIndex });

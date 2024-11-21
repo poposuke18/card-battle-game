@@ -6,7 +6,7 @@ import type {
     UnitClass, 
     Position 
   } from './base';
-  import type { BaseEffect, WeaponEffect, LeaderEffect } from './effects';
+  import type { BaseEffect, WeaponEffect, LeaderEffect,LegendaryEffect,BossEffect } from './effects';
   
   export type Card = {
     id: string;
@@ -14,7 +14,7 @@ import type {
     category: CardCategory;
     name: string;
     points: number;
-    effect?: BaseEffect | WeaponEffect | LeaderEffect;
+    effect?: BaseEffect | WeaponEffect | LeaderEffect | LegendaryEffect| BossEffect;
     turn: number;
     class?: UnitClass;
   };

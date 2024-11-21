@@ -92,7 +92,12 @@ export function GameController() {
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-red-400 mb-1">
             Card Battle Game
           </h1>
-          
+          {process.env.NODE_ENV === 'development' && (
+  <DebugCardList
+    onSelectCard={(card) => actions.selectCard(card)}
+    className="mt-2"
+  />
+)}
           <p className="text-gray-400">戦略的に配置して勝利を目指そう！</p>
         </motion.div>
         

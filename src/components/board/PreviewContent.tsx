@@ -4,9 +4,9 @@ import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Card } from '@/types';
 
-type PreviewContentProps = {
+export type PreviewContentProps = {
   card: Card;
-  previewScore: number | null;
+  previewScore: number | null; 
 };
 
 export const PreviewContent = memo(({ 

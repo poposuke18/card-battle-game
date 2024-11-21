@@ -35,20 +35,7 @@ export default function DebugCardList({
   const [selectedType, setSelectedType] = useState<'ally' | 'enemy' | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // ターンごとのカードを取得
-  const getTurnCards = (turn: number) => {
-    switch (turn) {
-      case 1: return TURN1_CARDS;
-      case 2: return TURN2_CARDS;
-      case 3: return TURN3_CARDS;
-      case 4: return TURN4_CARDS;
-      case 5: return TURN5_CARDS;
-      case 6: return TURN6_CARDS;
-      case 7: return TURN7_CARDS;
-      case 8: return TURN8_CARDS;  // ボスカードを追加
-      default: return [];
-    }
-  };
+  
 
   // フィルタリングされたカード一覧
   const filteredCards = allCards.filter(card => {

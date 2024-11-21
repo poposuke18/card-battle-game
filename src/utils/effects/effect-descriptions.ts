@@ -1,19 +1,19 @@
 // src/utils/effects/effect-descriptions.ts
 
 import { 
-    getEffectRange, 
-    EFFECT_PATTERNS 
+    getEffectRange
   } from './effect-system';
   import { 
     BaseEffect,
-    WeaponEffect,
     LeaderEffect,
     Card,
-    Position,
     FieldEffect,
     SupportEffect,
     isFieldEffect,
-    EffectDetails 
+    EffectDetails,
+    EffectWithType,
+    WeaponEffect,
+    UnitClass
   } from '@/types';
   import { getClassDisplayName } from '@/utils/common';
   
@@ -154,16 +154,16 @@ import {
     }
   }
   
-  export function getWeaponEffectDescription(effect: WeaponEffect | any): string {  // anyを追加して複数クラス対応
+  export function getWeaponEffectDescription(effect: WeaponEffect): string {
     const directionText = getDirectionText(effect.type);
-  
-    // targetClassesが存在する場合は複数クラス用の説明を生成
-    if ('targetClasses' in effect) {
-      const classNames = effect.targetClasses.map(c => getClassDisplayName(c)).join('と');
+    
+    if (effect.targetClasses) {
+      const classNames = effect.targetClasses.map((c: UnitClass) => 
+        getClassDisplayName(c)
+      ).join('と');
       return `${directionText}の${classNames}を${effect.power}強化`;
     }
   
-    // 従来の単一クラス用の説明
     const targetClass = getClassDisplayName(effect.targetClass);
     return `${directionText}の${targetClass}を${effect.power}強化`;
   }
@@ -186,7 +186,7 @@ import {
     }
   }
 
-  export function getLegendaryEffectDescription(effect: any): string {
+  export function getLegendaryEffectDescription(effect: EffectWithType): string {
     switch (effect.type) {
       case 'LEGENDARY_DRAGON_KNIGHT':
         return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.secondaryEffect.range}マス以内の武器効果を${effect.secondaryEffect.effectMultiplier}倍に増幅`;
@@ -206,10 +206,13 @@ import {
             case 'LEGENDARY_DEMON_EMPEROR':
               return `十字方向の味方ユニットを${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。
                       周囲${effect.selfEffect.range}マスの敵1体につき自身を${effect.selfEffect.powerPerEnemy}強化`;
+
+                      default:
+        return '効果なし';
       }
   }
 
-  export function getBossEffectDescription(effect: any): string {
+  export function getBossEffectDescription(effect: EffectWithType): string {
     switch (effect.type) {
       case 'BOSS_IFRIT':
         return `◇範囲${effect.primaryEffect.range}マス内の敵ユニットを${Math.abs(effect.primaryEffect.enemyPenalty)}弱体化し、

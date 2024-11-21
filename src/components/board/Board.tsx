@@ -1,33 +1,13 @@
 // src/components/board/Board.tsx
 
 import React, { memo, useMemo, useCallback, useState } from 'react';  // useState を追加
-import { CardScore } from '@/components/card/CardScore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlacedCardContent } from './PlacedCardContent';
 import { calculateCardScore } from '@/utils/score/calculator';  // この行を追加
 import { PreviewContent } from './PreviewContent';
-import { 
-  EffectRangeOverlay, 
-  EffectLine, 
-  EffectIcon,
-  EffectDescription
-} from '@/components/effects/EffectDisplay';
-import { getClassIcon } from '@/utils/common';
-import { 
-  usePerformanceMonitor,
-  useBoardChanges,
-  useEffectCalculation,
-  createPositionCache
-} from '@/utils/performance/optimizations';
-import { 
-  calculateEffectValue, 
-  getEffectDetails, 
-  getEffectStyle,
-  getEffectRange 
-} from '@/utils/effects/index';
-
-// セルの位置計算用キャッシュ
-const positionCache = createPositionCache();
+import { getEffectRange } from '@/utils/effects/index';
+import type { Position, PlacedCard, Card } from '@/types';
+import type { BoardProps } from './types';
 
 type BoardCellProps = {
   position: Position;
@@ -126,34 +106,9 @@ const BoardCell = memo(({
     </motion.div>
   );
 });
+BoardCell.displayName = 'BoardCell';
 
-// カード配置プレビュー
-const PreviewContent = memo(({
-  card,
-  previewScore
-}: {
-  card: Card;
-  previewScore: number | null;
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center"
-    >
-      <div className="absolute inset-0 bg-gray-900/50 rounded-lg" />
-      {previewScore !== null && (
-        <span className={`
-          relative text-lg font-bold
-          ${previewScore > 0 ? 'text-green-400' : 'text-red-400'}
-        `}>
-          {previewScore > 0 ? '+' : ''}{previewScore}
-        </span>
-      )}
-    </motion.div>
-  );
-});
+
 
 // 配置可能スロットの表示
 const AvailableSlotIndicator = memo(() => {
@@ -165,6 +120,8 @@ const AvailableSlotIndicator = memo(() => {
     />
   );
 });
+AvailableSlotIndicator.displayName = 'AvailableSlotIndicator';
+
 
 // メインのボードコンポーネント
 export const Board = memo(({

@@ -4,15 +4,15 @@ import {
   Position, 
   PlacedCard, 
   Card, 
-  Effect, 
-  EffectType,
+  Effect,
   BaseEffect,
   WeaponEffect,
   LeaderEffect,
   FieldEffect,
+  BossEffect,
   isFieldEffect
 } from '@/types';
-import { getClassDisplayName } from '@/utils/common';
+import { LegendaryEffect, SupportEffect } from '@/types/effects';
 
 
 type EffectResult = {
@@ -58,7 +58,7 @@ export type EffectContext = {
 
 export type EffectDetails = {
   type: string;
-  effectType: 'base' | 'weapon' | 'leader' | 'field' | 'legendary';
+  effectType: 'base' | 'weapon' | 'leader' | 'field' | 'legendary' | 'boss';
   description: string;
   range: Position[];
   primaryEffect?: string;
@@ -280,7 +280,7 @@ export function countHorizontalEnemies(
     }
   }
 
-  return Math.min(count, 1); // 最大2体までカウント
+  return Math.min(count, 4); // 最大2体までカウント
 }
 
 function isDiagonallyAdjacent(pos1: Position, pos2: Position): boolean {
@@ -576,13 +576,25 @@ export function calculateEffectValue(context: EffectContext, effect: Effect | nu
    else if (isFieldEffect(effect)) {
     value = calculateFieldEffectValue(context, effect);
   } else if ('targetClass' in effect) {
-    value = calculateWeaponEffectValue(context, effect);
+    value = calculateWeaponEffectValue(context, effect as WeaponEffect);
   } else if (effect.type.startsWith('LEADER_')) {
     value = calculateLeaderEffectValue(context, effect as LeaderEffect);
   } else if (effect.type === 'ROW_COLUMN_BUFF' || effect.type === 'WEAPON_ENHANCEMENT') {
     value = calculateSupportEffectValue(context, effect as SupportEffect);
   } else {
     value = calculateBaseEffectValue(context, effect as BaseEffect);
+  }
+
+  switch (effect.type) {
+    // ボス効果の処理
+    case 'BOSS_IFRIT':
+    case 'BOSS_BAHAMUT':
+    case 'BOSS_LEVIATHAN':
+    case 'BOSS_ODIN': {
+      const bossEffect = effect as BossEffect;
+      value = calculateBossEffectValue(context, bossEffect);
+      break;
+    }
   }
 
   // エレミアの保護効果がある場合、マイナス効果を0にする
@@ -919,8 +931,7 @@ function calculateLeaderEffectValue(context: EffectContext, effect: LeaderEffect
       const penalty = hasWeaponEffect ? effect.weaponPenalty : effect.basePenalty;
       console.log('Applied penalty:', penalty, 'hasWeaponEffect:', hasWeaponEffect);
       return penalty || 0;
-    }
-    
+    } 
 
     case 'LEADER_GUARDIAN_BOOST': {
       // 自分自身への効果
@@ -1335,6 +1346,12 @@ function calculateBossEffectValue(context: EffectContext, effect: BossEffect): n
         }
       }
 
+      return 0;
+    }
+    case 'BOSS_BAHAMUT':
+    case 'BOSS_LEVIATHAN':
+    case 'BOSS_ODIN': {
+      // 他のボスの効果を実装
       return 0;
     }
 

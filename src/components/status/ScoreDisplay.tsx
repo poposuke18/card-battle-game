@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type ScoreDisplayProps = {
+export type ScoreDisplayProps = {
   allyScore: number;
   enemyScore: number;
   showDifference?: boolean;

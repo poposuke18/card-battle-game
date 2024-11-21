@@ -1,6 +1,6 @@
 // src/constants/cards/legendary-cards.ts
 
-import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES, calculateCardPoints } from './card-base';
+import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES } from './card-base';
 import type { Card } from '@/types';
 
 // 伝説ユニット用の特別な計算

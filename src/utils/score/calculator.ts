@@ -1,9 +1,7 @@
 // src/utils/score/calculator.ts
 
-import { Position, PlacedCard, Card, Effect, ScoreDetails,  isFieldEffect} from '@/types';
+import { Position, PlacedCard,Effect, ScoreDetails,  isFieldEffect} from '@/types';
 import { 
-  calculateEffectValue, 
-  checkEffectConditions,
   getEffectPriority,
   calculateCardEffects,  // 新しく追加する関数
 } from '../effects/index';
@@ -79,13 +77,13 @@ function getEffectBreakdown(effects: Map<string, { value: number; source: string
 }> {
   return Array.from(effects.entries())
     .map(([key, data]) => ({
-      type: key.split('-')[1],
+      type: key.split('-')[1] as Effect['type'],
       value: data.value,
       source: data.source
     }))
     .sort((a, b) => {
-      const priorityA = getEffectPriority({ type: a.type });
-      const priorityB = getEffectPriority({ type: b.type });
+      const priorityA = getEffectPriority({ type: a.type as Effect['type'] });
+      const priorityB = getEffectPriority({ type: b.type as Effect['type'] });
       return priorityB - priorityA;
     });
 }

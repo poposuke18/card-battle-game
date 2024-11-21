@@ -1,6 +1,6 @@
 // src/components/card/CardDetails.tsx
 
-import { memo, useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { PlacedCard, Position } from '@/types';
 import { getClassDisplayName, getClassIcon } from '@/utils/common';
@@ -13,7 +13,7 @@ import {
 } from '@/utils/effects/index';
 import { EffectIcon, EffectDescription } from '../effects/EffectDisplay';
 
-type CardDetailsProps = {
+export type CardDetailsProps = {
   card: PlacedCard;
   board: (PlacedCard | null)[][];
   position: Position;
@@ -39,6 +39,8 @@ export function CardDetails({
       sourcePosition: Position;
       effectValue: number;
       effectType: string;
+      description?: string; // Add optional description field
+
     }> = [];
   
     // 自身の効果の計算（伝説/ボス/特殊効果）
@@ -348,7 +350,7 @@ export function CardDetails({
     );
   }
 
-  // リーダー自己強化の表示
+
   if (effect.effectType === 'LEADER_SELF_BOOST') {
     return (
       <motion.div
@@ -359,12 +361,13 @@ export function CardDetails({
       >
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-purple-500 opacity-70" />
-          <span>{effect.description || 'リーダー効果'}</span>
+          <span>自己効果</span>
         </div>
-        <span className="text-purple-400">+{effect.effectValue}</span>
+        <span className="text-yellow-400">+{effect.effectValue}</span>
       </motion.div>
     );
   }
+
 
   // その他の効果の表示（既存のコード）
   return (

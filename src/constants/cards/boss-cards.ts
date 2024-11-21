@@ -1,7 +1,7 @@
 // src/constants/cards/boss-cards.ts
 
 import { createCard, generateCardId, BASE_POINTS, EFFECT_VALUES, STAGE_ENEMY_RATE } from './card-base';
-import type { Card, Position } from '@/types';
+import type { Card} from '@/types';
 
 // ボス用の特別な計算（ステージ依存）
 function calculateBossPoints(basePoint: number, stage: number): number {

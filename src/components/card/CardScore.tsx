@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 
-type CardScoreProps = {
+export type CardScoreProps = {
   score: number;
   isAnimated?: boolean;
   size?: 'sm' | 'md' | 'lg';

@@ -1,15 +1,15 @@
 // src/components/effects/EffectDisplay.tsx
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 import { memo } from 'react';
-import { Position, PlacedCard, Card, Effect,isFieldEffect,WeaponEffect } from '@/types';
+import { Position, PlacedCard, Effect,isFieldEffect, Card, WeaponEffect} from '@/types';
 import { 
   getEffectStyle, 
   getEffectDetails, 
   calculateDistance,
   getDirection
 } from '@/utils/effects/index';
-import { getClassIcon, getClassDisplayName } from '@/utils/common';  // getClassDisplayNameを追加
+import { getClassIcon } from '@/utils/common';  // getClassDisplayNameを追加
 
 // エフェクト表示用のパターンコンポーネント
 export function EffectPattern({ type, color }: { type: string; color: string }) {
@@ -142,8 +142,7 @@ export function EffectPattern({ type, color }: { type: string; color: string }) 
 // 効果範囲表示用のオーバーレイコンポーネント
 export function EffectRangeOverlay({ 
   card, 
-  position,
-  board 
+  position 
 }: { 
   card: PlacedCard;
   position: Position;
@@ -169,7 +168,7 @@ export function EffectRangeOverlay({
         <EffectPattern type={style.pattern} color={style.color} />
       </div>
 
-      {affectedPositions.map((pos, index) => (
+      {affectedPositions.map((pos: { row: number; col: number; }, index: number) => (
         <motion.div
           key={`effect-${pos.row}-${pos.col}`}
           className="absolute rounded-lg pointer-events-none"
@@ -238,8 +237,15 @@ export function EffectLine({
 // 効果アイコン表示コンポーネント
 export const EffectIcon = memo(({ effect, className = '' }: { effect: Effect; className?: string }) => {
   const style = getEffectStyle(effect);
-  const details = getEffectDetails({ effect } as any);
-  
+  const details = getEffectDetails({ 
+    id: 'temp-id',
+    name: 'temp',
+    type: 'ally',
+    category: 'unit',
+    points: 0,
+    turn: 1,
+    effect 
+  } as Card);  
   if (!details) return null;
 
   if (isFieldEffect(effect)) {
@@ -259,8 +265,9 @@ export const EffectIcon = memo(({ effect, className = '' }: { effect: Effect; cl
       style={{ color: style.color }}
     >
       {details.effectType === 'weapon' && 
-        // 武器効果の場合、targetClassに応じたアイコンを表示
-        (effect.targetClass ? getClassIcon(effect.targetClass) : '🗡️')
+        ((effect as WeaponEffect).targetClass ? 
+          getClassIcon((effect as WeaponEffect).targetClass) : 
+          '🗡️')
       }
       {details.effectType === 'leader' && '👑'}
       {details.effectType === 'legendary' && '👑'}
@@ -277,17 +284,13 @@ export const EffectIcon = memo(({ effect, className = '' }: { effect: Effect; cl
 
 export const EffectDescription = memo(({ 
   effect,
-  className = '',
-  board = null,
-  position = null
-}: { 
+  className = ''}: { 
   effect: Effect;
   className?: string;
   board?: (PlacedCard | null)[][] | null;
   position?: Position | null;
 }) => {
-  const style = getEffectStyle(effect);
-  const details = getEffectDetails({ effect } as any);
+  const details = getEffectDetails(effect);
   
   if (!details) return <span className={className}>効果なし</span>;
 

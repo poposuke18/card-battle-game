@@ -8,7 +8,7 @@ import { EffectRangeOverlay } from '../effects/EffectRangeOverlay';
 import { getClassIcon } from '@/utils/common';
 import { calculateCardScore } from '@/utils/score/calculator';
 
-type PlacedCardContentProps = {
+export type PlacedCardContentProps = {
   cell: PlacedCard;
   position: Position;
   isSelected: boolean;
@@ -21,10 +21,8 @@ type PlacedCardContentProps = {
 export const PlacedCardContent = memo(({
   cell,
   position,
-  isSelected,
   isHovered,
-  board,
-  score
+  board
 }: PlacedCardContentProps) => {
   const cardTypeStyle = cell.card.type === 'ally'
     ? 'bg-blue-500/90 text-white ring-1 ring-blue-400/50'

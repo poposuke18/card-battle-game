@@ -9,7 +9,6 @@ type GameStatusProps = {
 
 export function GameStatus({ status }: GameStatusProps) {
   const scoreDifference = status.allyScore - status.enemyScore;
-  const isWinning = scoreDifference > 0;
 
   return (
     <div className="mb-8 p-4 bg-gray-800/50 rounded-xl backdrop-blur-sm">

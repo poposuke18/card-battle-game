@@ -9,4 +9,4 @@ export type { CardScoreProps } from './CardScore';
 
 // アニメーションと詳細表示の型もエクスポート
 export type { CardDetailsProps } from './CardDetails';
-export type { AnimatedCardProps } from './AnimatedCard';
+export type { CardProps } from './AnimatedCard';

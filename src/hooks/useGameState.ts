@@ -269,7 +269,7 @@ export function useGameState() {
         payload: scores 
       });
     }
-  }, [state.board]);
+  }, [state.board, state.status.allyScore, state.status.enemyScore]);
 
   return {
     gameState: { ...state, currentStage },

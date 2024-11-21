@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { Card } from '@/types';
+import { Card, PlacedCard, Position } from '@/types';
 import { getClassDisplayName, getClassIcon } from '@/utils/common';
 import { 
   EffectIcon, 
   EffectDescription 
 } from '../effects/EffectDisplay';
 
-type CardProps = {
+export type CardProps = {
   card: Card;
   isSelected?: boolean;
   onClick?: () => void;

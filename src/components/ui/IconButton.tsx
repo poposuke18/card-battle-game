@@ -4,7 +4,7 @@ import { memo, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import type { ButtonProps } from './Button';
 
-type IconButtonProps = Omit<ButtonProps, 'children'> & {
+export type IconButtonProps = Omit<ButtonProps, 'children'> & {
   icon: React.ReactNode;
   label?: string;
 };
@@ -12,7 +12,6 @@ type IconButtonProps = Omit<ButtonProps, 'children'> & {
 export const IconButton = memo(forwardRef<HTMLButtonElement, IconButtonProps>(({
   icon,
   label,
-  variant = 'primary',
   size = 'md',
   disabled = false,
   className = '',
