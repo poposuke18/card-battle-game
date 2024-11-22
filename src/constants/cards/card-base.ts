@@ -29,14 +29,24 @@ export const TURN_GROWTH_RATE = {
   8: { ally: 2.0, enemy: 2.5 }    // ボスカード
 } as const;
 
-// ステージごとの敵の強化率
-export const STAGE_ENEMY_RATE = {
-  1: 1.0,    // 基本ステージ
-  2: 1.2,    // 中級ステージ
-  3: 1.5,    // 上級ステージ
-  4: 1.8,    // 超級ステージ
-  5: 2.2     // 極級ステージ
+type StageRate = {
+  [key: number]: number;
+  1: 1;
+  2: 1.2;
+  3: 1.5;
+  4: 1.8;
+  5: 2.2;
+};
+
+export const STAGE_ENEMY_RATE: StageRate = {
+  1: 1.0,
+  2: 1.2,
+  3: 1.5,
+  4: 1.8,
+  5: 2.2
 } as const;
+
+
 
 // 効果の基本値
 export const EFFECT_VALUES = {
@@ -84,8 +94,10 @@ export function calculateCardPoints(
   hasEffect: boolean = false
 ): number {
   const turnRate = TURN_GROWTH_RATE[turn][type];
-  const stageRate = type === 'enemy' ? STAGE_ENEMY_RATE[stage] || 1 : 1;
-  const effectRate = hasEffect ? 1 : 1;
+  const stageRate = type === 'enemy' 
+  ? STAGE_ENEMY_RATE[stage as keyof typeof STAGE_ENEMY_RATE] || 1 
+  : 1;
+    const effectRate = hasEffect ? 1 : 1;
 
   return Math.floor(basePoint * turnRate * stageRate * effectRate);
 }

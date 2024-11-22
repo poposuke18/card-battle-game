@@ -3,21 +3,23 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { PlacedCard, Position } from '@/types';
-import { getEffectStyle } from '@/utils/effects/index';
+import { getEffectStyle, getEffectRange } from '@/utils/effects/index';
 
-type EffectRangeOverlayProps = {
+export type EffectRangeOverlayProps = {
   card: PlacedCard;
   position: Position;
   board?: (PlacedCard | null)[][];
 };
 
 export const EffectRangeOverlay = memo(({
-  card
+  card,
+  position
 }: EffectRangeOverlayProps) => {
   if (!card.card.effect) return null;
 
   const style = getEffectStyle(card.card.effect);
   const { color, intensity, pattern } = style;
+  const range = getEffectRange(card.card.effect, position);
 
   // エフェクトの種類に応じたパターンのSVG定義
   const getPatternSvg = () => {
@@ -112,6 +114,7 @@ export const EffectRangeOverlay = memo(({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="absolute inset-0 pointer-events-none"
+      style={{ zIndex: 10 }}  // z-indexを追加
     >
       {/* ベースの効果範囲表示 */}
       <div
@@ -140,30 +143,40 @@ export const EffectRangeOverlay = memo(({
       </svg>
 
       {/* 効果範囲のアニメーション */}
-      <motion.div
-        className="absolute inset-0 rounded-lg ring-2"
-        style={{ 
-          ringColor: color,
-          opacity: intensity
-        }}
-        animate={{ 
-          scale: [1, 1.05, 1],
-          opacity: [intensity, intensity * 0.5, intensity]
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
+      {range.map((pos, index) => (
+        <motion.div
+          key={`effect-${pos.row}-${pos.col}`}
+          className="absolute rounded-lg pointer-events-none transform"
+          style={{ 
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            left: `${(pos.col - position.col) * 100}%`,
+            top: `${(pos.row - position.row) * 100}%`,
+            backgroundColor: style.color,
+            opacity: 0,
+            zIndex: 20  // 上のレイヤーに表示
+          }}
+          animate={{ 
+            opacity: [0.1, 0.2, 0.1]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: index * 0.1
+          }}
+        />
+      ))}
 
-      {/* 効果タイプに基づく追加のビジュアル効果 */}
-      {card.card.effect.type.includes('LEADER') && (
+      {/* リーダー/伝説カードのエフェクト */}
+      {(card.card.effect.type.startsWith('LEADER_') || 
+        card.card.effect.type.startsWith('LEGENDARY_')) && (
         <motion.div
           className="absolute inset-0 rounded-lg"
           style={{
             backgroundColor: color,
-            opacity: 0
+            opacity: 0,
+            zIndex: 30  // 最前面に表示
           }}
           animate={{
             opacity: [0, intensity * 0.2, 0]

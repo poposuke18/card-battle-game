@@ -22,7 +22,7 @@ export function useEffects(board: (PlacedCard | null)[][]) {
     const card = board[hoveredPosition.row][hoveredPosition.col];
     if (!card?.card.effect) return [];
     
-    return getEffectRange(hoveredPosition, card.card.effect);
+    return getEffectRange(card.card.effect, hoveredPosition);
   }, [hoveredPosition, board]);
 
   // 効果の計算
@@ -38,13 +38,20 @@ export function useEffects(board: (PlacedCard | null)[][]) {
       return { value: 0, type: 'buff', description: '', affected: [] };
     }
 
-    return calculateEffectValue({
+    const context = {
       sourcePosition,
       targetPosition,
       sourceCard: sourceCard.card,
       targetCard,
       board
-    }, effect);
+    };
+
+    return {
+      value: calculateEffectValue(context, effect),
+      type: 'buff',
+      description: '',
+      affected: []
+    };
   }, [board]);
 
   // 効果の視覚的スタイルの取得

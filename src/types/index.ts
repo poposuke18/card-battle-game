@@ -50,6 +50,7 @@ export type {
     GamePhase,
     GameAction,
     GameHistory,
+    SpecialRule,
     TurnData,
     GameSettings,
     GameProgress,

@@ -12,6 +12,7 @@ export type GameState = {
   canEndTurn: boolean;
   history: GameHistory[];
   lastAction: GameAction | null;
+  currentStage: number;
 };
 
 export type GameStatus = {
@@ -30,14 +31,16 @@ export type GamePhase =
   | 'scoring'
   | 'end';
 
-export type GameAction = 
-  | { type: 'INITIALIZE_GAME'; payload: { currentHand: Card[]; nextHand: Card[] } }
+  export type GameAction = 
+  | { type: 'INITIALIZE_GAME'; payload: { currentHand: Card[]; nextHand: Card[]; currentStage: number } }
   | { type: 'SELECT_CARD'; card: Card }
   | { type: 'PLACE_CARD'; position: Position }
   | { type: 'UNDO_LAST_MOVE' }
-  | { type: 'END_TURN' }
+  | { type: 'END_TURN'; payload: { nextHand: Card[]; nextTurn: number } }
   | { type: 'START_GAME' }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  | { type: 'UPDATE_SCORES'; payload: { allyScore: number; enemyScore: number } };
+
 
 export type GameHistory = {
   action: 'PLACE_CARD';
@@ -52,13 +55,19 @@ export type GameHistory = {
   };
 };
 
+export type SpecialRule = {
+  type: string;
+  description: string;
+  rules?: {
+    bossOnly?: boolean;
+    finalTurn?: boolean;
+  };
+};
+
 export type TurnData = {
   turn: number;
   cardsToPlay: number;
-  specialRules?: {
-    type: string;
-    description: string;
-  }[];
+  specialRules: SpecialRule[];
 };
 
 export type GameSettings = {

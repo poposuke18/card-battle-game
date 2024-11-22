@@ -69,24 +69,29 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         selectedCard: state.selectedCard?.id === action.card.id ? null : action.card
       };
 
-    case 'PLACE_CARD': {
-      if (!state.selectedCard) return state;
-
-      const newBoard = state.board.map((row, rowIndex) =>
-        row.map((cell, colIndex) => {
-          if (rowIndex === action.position.row && colIndex === action.position.col) {
-            return {
-              card: state.selectedCard,
-              position: { row: rowIndex, col: colIndex }
-            };
-          }
-          return cell;
-        })
-      );
-
-      const scores = calculateBoardScores(newBoard);
-      const remainingCards = state.currentHand.filter(card => card.id !== state.selectedCard.id);
-
+      case 'PLACE_CARD': {
+        if (!state.selectedCard) return state;
+  
+        const newBoard = state.board.map(row =>
+          row.map(cell => cell ? cell : null)
+        ).map((row, rowIndex) =>
+          row.map((cell, colIndex) => {
+            if (rowIndex === action.position.row && colIndex === action.position.col) {
+              return {
+                card: state.selectedCard,
+                position: { row: rowIndex, col: colIndex }
+              } as PlacedCard;
+            }
+            return cell;
+          })
+        );
+  
+        const remainingCards = state.currentHand.filter(card => 
+          card.id !== state.selectedCard?.id
+        );
+  
+        const scores = calculateBoardScores(newBoard);
+  
       return {
         ...state,
         board: newBoard,
@@ -117,17 +122,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'END_TURN': {
-      const nextTurn = state.status.turn + 1;
-      if (nextTurn > 8) {
+      if (state.status.turn >= 8) {
         const scores = calculateBoardScores(state.board);
-        const isWinner = scores.allyScore > scores.enemyScore;
-        
         return {
           ...state,
           status: {
             ...state.status,
             gameOver: true,
-            winner: isWinner ? 'ally' : 'enemy',
+            winner: scores.allyScore > scores.enemyScore ? 'ally' : 'enemy',
             allyScore: scores.allyScore,
             enemyScore: scores.enemyScore
           }
@@ -140,7 +142,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         nextHand: action.payload.nextHand,
         status: {
           ...state.status,
-          turn: nextTurn
+          turn: action.payload.nextTurn
         },
         canEndTurn: false,
         history: []
@@ -183,7 +185,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-export function useGameState() {
+export function useGameState(stage: number) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const [isInitialized, setIsInitialized] = useState(false);
   const searchParams = useSearchParams();
@@ -192,20 +194,20 @@ export function useGameState() {
 
   const initializeGame = useCallback(() => {
     // 1ターン目のカード
-    const initialHand = generateHandWithStageBonus(1, currentStage);
+    const initialHand = generateHandWithStageBonus(1, stage);
     // 2ターン目のカード
-    const nextHand = generateHandWithStageBonus(2, currentStage);
+    const nextHand = generateHandWithStageBonus(2, stage);
     
     dispatch({ 
       type: 'INITIALIZE_GAME', 
       payload: { 
         currentHand: initialHand, 
         nextHand: nextHand,
-        currentStage 
+        currentStage: stage 
       } 
     });
     setIsInitialized(true);
-  }, [currentStage]);
+  }, [stage]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -272,7 +274,7 @@ export function useGameState() {
   }, [state.board, state.status.allyScore, state.status.enemyScore]);
 
   return {
-    gameState: { ...state, currentStage },
+    gameState: { ...state, currentStage: stage },  // stageを明示的に返す
     actions: {
       initializeGame,
       selectCard,

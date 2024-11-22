@@ -1,101 +1,107 @@
 // src/utils/effects/effect-descriptions.ts
 
 import { 
-    getEffectRange
-  } from './effect-system';
-  import { 
-    BaseEffect,
-    LeaderEffect,
-    Card,
-    FieldEffect,
-    SupportEffect,
-    isFieldEffect,
-    EffectDetails,
-    EffectWithType,
-    WeaponEffect,
-    UnitClass
-  } from '@/types';
-  import { getClassDisplayName } from '@/utils/common';
+  getEffectRange
+} from './effect-system';
+import { 
+  BaseEffect,
+  LeaderEffect,
+  Card,
+  FieldEffect,
+  SupportEffect,
+  isFieldEffect,
+  EffectDetails,
+  EffectWithType,
+  WeaponEffect,
+  UnitClass,
+  LegendaryEffect,
+  BossEffect
+} from '@/types';
+import { getClassDisplayName } from '@/utils/common';
   
-  export function getEffectDetails(card: Card): EffectDetails | null {
-    if (!card.effect) return null;
-  
-    const effect = card.effect;
-    const range = getEffectRange(card, { row: 2, col: 2 });
-  
-    if (isFieldEffect(effect)) {
-      return {
-        type: effect.type,
-        effectType: 'field',
-        description: getFieldEffectDescription(effect),
-        range,
-        pattern: 'FIELD'
-      };
-    }
-  
-    if (effect.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
-      return {
-        type: effect.type,
-        effectType: 'base',
-        description: getSelfEffectDescription(effect),
-        range
-      };
-    }
+// src/utils/effects/effect-descriptions.ts
 
-    if (effect.type === 'ROW_COLUMN_BUFF' || effect.type === 'WEAPON_ENHANCEMENT') {
-      return {
-        type: effect.type,
-        effectType: 'support',
-        description: getSupportEffectDescription(effect as SupportEffect),
-        range
-      };
-    }
-  
-    if ('targetClass' in effect) {
-      return {
-        type: effect.type,
-        effectType: 'weapon',
-        description: getWeaponEffectDescription(effect),
-        range
-      };
-    }
-  
-    if (effect.type.startsWith('LEADER_')) {
-      return {
-        type: effect.type,
-        effectType: 'leader',
-        description: getLeaderEffectDescription(effect as LeaderEffect),
-        range
-        
-      };
-    }
+export function getEffectDetails(input: Card): EffectDetails | null {
+  // 最初にeffectの存在チェック
+  if (!input.effect) return null;
+  const effect = input.effect;
 
-    if (effect.type.startsWith('LEGENDARY_')) {
-      return {
-        type: effect.type,
-        effectType: 'legendary',
-        description: getLegendaryEffectDescription(effect),
-        range,
-      };
-    }
+  // 位置は固定値を使用
+  const position = { row: 2, col: 2 };
+  const range = getEffectRange(effect, position);
 
-    if (effect.type.startsWith('BOSS_')) {
-      return {
-        type: effect.type,
-        effectType: 'boss',
-        description: getBossEffectDescription(effect),
-        range,
-        pattern: 'FIELD'  // ボスは基本的にフィールド全体に影響を与える
-      };
-    }
-  
+  if (isFieldEffect(effect)) {
+    return {
+      type: effect.type,
+      effectType: 'field',
+      description: getFieldEffectDescription(effect),
+      range,
+      pattern: 'FIELD'
+    };
+  }
+
+  if (effect.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
     return {
       type: effect.type,
       effectType: 'base',
-      description: getBaseEffectDescription(effect as BaseEffect),
+      description: getSelfEffectDescription(effect as BaseEffect),
       range
     };
   }
+
+  if (effect.type === 'ROW_COLUMN_BUFF' || effect.type === 'WEAPON_ENHANCEMENT') {
+    return {
+      type: effect.type,
+      effectType: 'support',
+      description: getSupportEffectDescription(effect as SupportEffect),
+      range
+    };
+  }
+
+  if ('targetClass' in effect) {
+    return {
+      type: effect.type,
+      effectType: 'weapon',
+      description: getWeaponEffectDescription(effect as WeaponEffect),
+      range
+    };
+  }
+
+  if (effect.type.startsWith('LEADER_')) {
+    return {
+      type: effect.type,
+      effectType: 'leader',
+      description: getLeaderEffectDescription(effect as LeaderEffect),
+      range
+    };
+  }
+
+  if (effect.type.startsWith('LEGENDARY_')) {
+    return {
+      type: effect.type,
+      effectType: 'legendary',
+      description: getLegendaryEffectDescription(effect as LegendaryEffect),
+      range
+    };
+  }
+
+  if (effect.type.startsWith('BOSS_')) {
+    return {
+      type: effect.type,
+      effectType: 'boss',
+      description: getBossEffectDescription(effect as BossEffect),
+      range,
+      pattern: 'FIELD'
+    };
+  }
+
+  return {
+    type: effect.type,
+    effectType: 'base',
+    description: getBaseEffectDescription(effect as BaseEffect),
+    range
+  };
+}
   
   export function getBaseEffectDescription(effect: BaseEffect): string {
     const power = effect.power || 0;
@@ -195,29 +201,32 @@ import {
         return `範囲${effect.fieldEffect.range}マスの味方を${effect.fieldEffect.allyBonus}強化、サポートを${effect.fieldEffect.supportBonus}強化し、隣接する味方のマイナス効果を無効化`;
       
       case 'LEGENDARY_DUAL_SWORDSMAN':
-        return `縦横の味方を${effect.verticalEffect.power}強化し、敵を${Math.abs(effect.verticalEffect.debuff)}弱体化`;
+        return `縦横の味方を${effect.primaryEffect.power}強化し、敵を${Math.abs(effect.secondaryEffect.effectMultiplier)}弱体化`;
       
-        case 'LEGENDARY_CHAOS_DRAGON':
-          return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.fieldEffect.range}マスの敵ユニットを${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化`;
+      case 'LEGENDARY_CHAOS_DRAGON':
+        return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.fieldEffect.range}マスの敵ユニットを${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化`;
   
-          case 'LEGENDARY_ARCHMAGE':
-            return `範囲${effect.fieldEffect.range}マスの味方ユニットを${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍`;
-    
-            case 'LEGENDARY_DEMON_EMPEROR':
-              return `十字方向の味方ユニットを${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。
-                      周囲${effect.selfEffect.range}マスの敵1体につき自身を${effect.selfEffect.powerPerEnemy}強化`;
-
-                      default:
+      case 'LEGENDARY_ARCHMAGE':
+        return `範囲${effect.fieldEffect.range}マスの味方ユニットを${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍`;
+  
+      case 'LEGENDARY_DEMON_EMPEROR':
+        return `十字方向の味方ユニットを${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。
+                周囲${effect.selfEffect.range}マスの敵1体につき自身を${effect.selfEffect.powerPerEnemy}強化`;
+  
+      default:
         return '効果なし';
-      }
+    }
   }
 
-  export function getBossEffectDescription(effect: EffectWithType): string {
+  function getBossEffectDescription(effect: EffectWithType): string {
     switch (effect.type) {
-      case 'BOSS_IFRIT':
-        return `◇範囲${effect.primaryEffect.range}マス内の敵ユニットを${Math.abs(effect.primaryEffect.enemyPenalty)}弱体化し、
-                範囲内の敵1体につき自身を${effect.secondaryEffect.powerPerWeakened}強化する`;
-      // 他のボスの説明も必要に応じて追加
+      case 'BOSS_IFRIT': {
+        const range = effect.primaryEffect?.range || 2;
+        const penalty = Math.abs(effect.primaryEffect?.enemyPenalty || 0);
+        const powerUp = effect.secondaryEffect?.powerPerWeakened || 0;
+        return `◇範囲${range}マス内の敵ユニットを${penalty}弱体化し、
+                範囲内の敵1体につき自身を${powerUp}強化する`;
+      }
       default:
         return '強大な力を持つ';
     }

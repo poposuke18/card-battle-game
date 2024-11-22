@@ -4,7 +4,7 @@ import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Position } from '@/types';
 
-type EffectLineProps = {
+export type EffectLineProps = {
   from: Position;
   to: Position;
   color: string;

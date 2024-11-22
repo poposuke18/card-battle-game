@@ -140,7 +140,8 @@ export const Board = memo(({
     if (!cell?.card.effect) return [];
     
     // getEffectRange を使用して効果範囲を計算
-    return getEffectRange(cell.card, hoveredPosition);
+    return getEffectRange(cell.card.effect, hoveredPosition);
+
   }, [hoveredPosition, board]);
 
   // プレビュースコアの計算

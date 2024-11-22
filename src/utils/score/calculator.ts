@@ -1,10 +1,22 @@
 // src/utils/score/calculator.ts
 
-import { Position, PlacedCard,Effect, ScoreDetails,  isFieldEffect} from '@/types';
 import { 
+  Position, 
+  PlacedCard, 
+  ScoreDetails, 
+  isFieldEffect, 
+  BaseEffect,
+  BaseEffectType 
+} from '@/types';import { 
   getEffectPriority,
   calculateCardEffects,  // 新しく追加する関数
 } from '../effects/index';
+
+const dummyBaseEffect: BaseEffect = {
+  type: 'ADJACENT_UNIT_BUFF',  // BaseEffectTypeの有効な値を使用
+  power: 0,
+  range: 1
+};
 
 export function calculateCardScore(
   position: Position,
@@ -70,6 +82,8 @@ export function calculateCardScore(
   };
 }
 
+// src/utils/score/calculator.ts
+
 function getEffectBreakdown(effects: Map<string, { value: number; source: string }>): Array<{
   type: string;
   value: number;
@@ -77,13 +91,21 @@ function getEffectBreakdown(effects: Map<string, { value: number; source: string
 }> {
   return Array.from(effects.entries())
     .map(([key, data]) => ({
-      type: key.split('-')[1] as Effect['type'],
+      type: key.split('-')[1],
       value: data.value,
       source: data.source
     }))
     .sort((a, b) => {
-      const priorityA = getEffectPriority({ type: a.type as Effect['type'] });
-      const priorityB = getEffectPriority({ type: b.type as Effect['type'] });
-      return priorityB - priorityA;
+      // 基本エフェクトとして扱う
+      const effectA: BaseEffect = {
+        ...dummyBaseEffect,
+        type: a.type as BaseEffectType
+      };
+      const effectB: BaseEffect = {
+        ...dummyBaseEffect,
+        type: b.type as BaseEffectType
+      };
+      
+      return getEffectPriority(effectB) - getEffectPriority(effectA);
     });
 }

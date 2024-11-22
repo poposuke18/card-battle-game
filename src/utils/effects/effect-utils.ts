@@ -61,14 +61,14 @@ export function getEffectMultiplier(
   const { sourcePosition, board } = context;
   let multiplier = 1;
 
-  board.forEach((row: PlacedCard[], rowIndex: number) => {
-    row.forEach((cell, colIndex) => {
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {  // colIndexをここで定義
       if (!cell?.card.effect) return;
       const distance = getDistance(sourcePosition, { row: rowIndex, col: colIndex });
       
       if (effectType === 'WEAPON' && cell.card.effect.type === 'WEAPON_ENHANCEMENT') {
         if (distance <= (cell.card.effect.range || 1)) {
-          multiplier *= (cell.card.effect.effectMultiplier || 2);
+          multiplier *= cell.card.effect.effectMultiplier || 2;
         }
       }
     });
@@ -80,3 +80,8 @@ export function getEffectMultiplier(
 export function getDistance(a: Position, b: Position): number {
   return Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
 }
+
+type EffectCalculationContext = {
+  sourcePosition: Position;
+  board: (PlacedCard | null)[][];
+};

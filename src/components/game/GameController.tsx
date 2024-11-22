@@ -12,10 +12,13 @@ import { useGameProgress } from '@/hooks/useGameProgress';  // 追加：ステ�
 import { useEffects } from '@/hooks/useEffects';  // 追加：効果範囲表示用
 import type { PlacedCard, Position } from '@/types';
 import DebugCardList from '@/components/debug/DebugCardList';
+import { useSearchParams } from 'next/navigation';
 
 
 export function GameController() {
-  const { gameState, actions } = useGameState();
+  const searchParams = useSearchParams();
+  const currentStage = Number(searchParams.get('stage')) || 1;
+  const { gameState, actions } = useGameState(currentStage);
   const { clearStage } = useGameProgress();
   const { hoveredPosition, setHoveredPosition, effectRange } = useEffects(gameState.board);
   const [showTurnTransition, setShowTurnTransition] = useState(false);

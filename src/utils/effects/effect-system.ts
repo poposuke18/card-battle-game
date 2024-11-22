@@ -66,11 +66,7 @@ export type EffectDetails = {
   pattern?: keyof typeof EFFECT_PATTERNS;
 };
 
-// ユーティリティ関数
-function isPositionValid(position: Position, boardSize: number = 5): boolean {
-  return position.row >= 0 && position.row < boardSize && 
-         position.col >= 0 && position.col < boardSize;
-}
+
 
 export function calculateCardEffects(
   position: Position,
@@ -297,17 +293,16 @@ function isSameType(card1: Card, card2: Card): boolean {
   return card1.type === card2.type;
 }
 
-export function getEffectRange(card: Card, position: Position): Position[] {
-  if (!card.effect) return [];
-  
+export function getEffectRange(effect: Effect, position: Position): Position[] {
   const positions: Position[] = [];
   const offset = (r: number, c: number) => ({
     row: position.row + r,
     col: position.col + c
   });
 
-  if (isFieldEffect(card.effect)) {
-    // フィールド効果のダイヤモンド型範囲
+  if (!effect) return positions;
+
+  if (isFieldEffect(effect)) {
     return [
       offset(-2, 0),
       offset(-1, -1), offset(-1, 0), offset(-1, 1),
@@ -317,8 +312,8 @@ export function getEffectRange(card: Card, position: Position): Position[] {
     ];
   }
 
-  if (card.effect.type.startsWith('BOSS_')) {
-    switch (card.effect.type) {
+  if (effect.type.startsWith('BOSS_')) {
+    switch (effect.type) {
       case 'BOSS_IFRIT': {
         // 範囲2マスの効果
         for (let r = -2; r <= 2; r++) {
@@ -330,14 +325,12 @@ export function getEffectRange(card: Card, position: Position): Position[] {
         }
         return positions.filter(pos => isPositionValid(pos));
       }
-      // 他のボスの効果範囲も同様に実装
-      // ...
     }
   }
 
-  switch (card.effect.type) {
+  switch (effect.type) {
     case 'UNIT_VERTICAL_ENEMY_DEBUFF':
-  return [offset(-1, 0), offset(1, 0)];
+      return [offset(-1, 0), offset(1, 0)];
 
     case 'DIAGONAL_DEBUFF':
       return [
@@ -357,11 +350,11 @@ export function getEffectRange(card: Card, position: Position): Position[] {
         offset(0, -1), offset(0, 1)
       ];
 
-      case 'LEADER_ARCHER_DEBUFF':
-        return [
-          offset(-1, -1), offset(-1, 1),
-          offset(1, -1), offset(1, 1)
-        ].filter(pos => isPositionValid(pos));   
+    case 'LEADER_ARCHER_DEBUFF':
+      return [
+        offset(-1, -1), offset(-1, 1),
+        offset(1, -1), offset(1, 1)
+      ].filter(pos => isPositionValid(pos));   
 
     case 'LEADER_GUARDIAN_BOOST':
       return [
@@ -369,17 +362,16 @@ export function getEffectRange(card: Card, position: Position): Position[] {
         offset(0, -1), offset(0, 1)
       ];
 
-      case 'LEADER_LANCER_BOOST':
-        // 横一列すべてを範囲に（敵を数えるため）
-        return Array.from({ length: 5 }, (_, i) => 
-          offset(0, i - position.col)
-        ).filter(pos => 
-          pos.col !== position.col && 
-          isPositionValid(pos)
-        );      
+    case 'LEADER_LANCER_BOOST':
+      return Array.from({ length: 5 }, (_, i) => 
+        offset(0, i - position.col)
+      ).filter(pos => 
+        pos.col !== position.col && 
+        isPositionValid(pos)
+      );      
 
     case 'LEADER_MAGE_EFFECT': {
-      const range = card.effect.range || 2;
+      const range = effect.range || 2;
       for (let r = -range; r <= range; r++) {
         for (let c = -range; c <= range; c++) {
           if (r === 0 && c === 0) continue;
@@ -390,8 +382,7 @@ export function getEffectRange(card: Card, position: Position): Position[] {
     }
 
     case 'ROW_COLUMN_BUFF': {
-      const { targetDirection } = card.effect;  // effect -> card.effect に修正
-      const positions: Position[] = [];
+      const { targetDirection } = effect;
       
       if (targetDirection === 'vertical') {
         // 縦方向の範囲
@@ -429,118 +420,32 @@ export function getEffectRange(card: Card, position: Position): Position[] {
         offset(0, -1), offset(0, 1)
       ];
 
-      case 'FIELD_DUAL_EFFECT': {
-        const range = card.effect.range || 2;
-        const positions: Position[] = [];
-        
-        for (let r = -range; r <= range; r++) {
-          for (let c = -range; c <= range; c++) {
-            if (r === 0 && c === 0) continue;
-            
-            const newRow = position.row + r;
-            const newCol = position.col + c;
-            
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
-              positions.push({ row: newRow, col: newCol });
-            }
+    case 'FIELD_DUAL_EFFECT': {
+      const range = effect.range || 2;
+      const positions: Position[] = [];
+      
+      for (let r = -range; r <= range; r++) {
+        for (let c = -range; c <= range; c++) {
+          if (r === 0 && c === 0) continue;
+          
+          const newRow = position.row + r;
+          const newCol = position.col + c;
+          
+          if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
+            positions.push({ row: newRow, col: newCol });
           }
         }
-        return positions;
       }
-
-      case 'LEGENDARY_DRAGON_KNIGHT': {
-        const positions: Position[] = [];
-        // 十字方向（隣接効果）
-        positions.push(
-          offset(-1, 0), offset(1, 0),
-          offset(0, -1), offset(0, 1)
-        );
-        // 武器強化範囲
-        for (let r = -2; r <= 2; r++) {
-          for (let c = -2; c <= 2; c++) {
-            if (r === 0 && c === 0) continue;
-            positions.push(offset(r, c));
-          }
-        }
-        return positions.filter(pos => isPositionValid(pos));
-      }
-  
-      case 'LEGENDARY_SAGE': {
-        const range = 2;
-        const positions: Position[] = [];
-        for (let r = -range; r <= range; r++) {
-          for (let c = -range; c <= range; c++) {
-            if (r === 0 && c === 0) continue;
-            positions.push(offset(r, c));
-          }
-        }
-        return positions.filter(pos => isPositionValid(pos));
-      }
-  
-      case 'LEGENDARY_DUAL_SWORDSMAN': {
-        // 縦横の効果範囲
-        return [
-          // 縦方向
-          offset(-1, 0), offset(1, 0),
-          // 横方向
-          offset(0, -1), offset(0, 1)
-        ].filter(pos => isPositionValid(pos));
-      }
-  
-      case 'LEGENDARY_CHAOS_DRAGON': {
-        const positions: Position[] = [];
-        // 十字方向の強化
-        positions.push(
-          offset(-1, 0), offset(1, 0),
-          offset(0, -1), offset(0, 1)
-        );
-        // 範囲2マスの弱体化
-        for (let r = -2; r <= 2; r++) {
-          for (let c = -2; c <= 2; c++) {
-            if (r === 0 && c === 0) continue;
-            positions.push(offset(r, c));
-          }
-        }
-        return positions.filter(pos => isPositionValid(pos));
-      }
-  
-      case 'LEGENDARY_ARCHMAGE': {
-        const range = 2;
-        const positions: Position[] = [];
-        for (let r = -range; r <= range; r++) {
-          for (let c = -range; c <= range; c++) {
-            if (r === 0 && c === 0) continue;
-            positions.push(offset(r, c));
-          }
-        }
-        return positions.filter(pos => isPositionValid(pos));
-      }
-  
-      case 'LEGENDARY_DEMON_EMPEROR': {
-        const positions: Position[] = [];
-        // 十字方向の効果
-        positions.push(
-          offset(-1, 0), offset(1, 0),
-          offset(0, -1), offset(0, 1)
-        );
-        // 範囲2マスの敵カウント範囲
-        for (let r = -2; r <= 2; r++) {
-          for (let c = -2; c <= 2; c++) {
-            if (r === 0 && c === 0) continue;
-            positions.push(offset(r, c));
-          }
-        }
-        return positions.filter(pos => isPositionValid(pos));
-      }
+      return positions;
+    }
 
     default:
       return [];
   }
+}
 
-  return positions.filter(pos => 
-    pos.row >= 0 && pos.row < 5 && 
-    pos.col >= 0 && pos.col < 5
-  );
+function isPositionValid(position: Position): boolean {
+  return position.row >= 0 && position.row < 5 && position.col >= 0 && position.col < 5;
 }
 
 export function calculateEffectValue(context: EffectContext, effect: Effect | null): number {
@@ -747,7 +652,6 @@ function calculateBaseEffectValue(context: EffectContext, effect: BaseEffect): n
             return 0;
           }
     
-          console.log('Success: Applying debuff effect', -effect.power);
           // 負の値を返して弱体化
           return -(effect.power || 0);
         }
@@ -915,8 +819,8 @@ function calculateLeaderEffectValue(context: EffectContext, effect: LeaderEffect
           if (cell.card.category !== 'weapon') return;
           
           // 武器の効果範囲を取得
-          const weaponRangePositions = getEffectRange(cell.card, { row: rowIndex, col: colIndex });
-          
+          const weaponRangePositions = cell.card.effect ? 
+          getEffectRange(cell.card.effect, { row: rowIndex, col: colIndex }) : [];          
           // リーダー（sourcePosition）が武器の効果範囲に含まれているかチェック
           hasWeaponEffect = weaponRangePositions.some(pos => 
             pos.row === sourcePosition.row && pos.col === sourcePosition.col
@@ -955,7 +859,7 @@ function calculateLeaderEffectValue(context: EffectContext, effect: LeaderEffect
     case 'LEADER_LANCER_BOOST': {
       // 自身への効果のみ
       if (sourcePosition.row !== targetPosition.row || 
-          sourcePosition.col !== targetPosition.col );     
+          sourcePosition.col !== targetPosition.col )return 0;     
       // 横方向の敵ユニット数をカウント
       const enemyCount = countHorizontalEnemies(sourcePosition, board, sourceCard.type);
       return (effect.selfBoostPerEnemy || 0) * enemyCount;
@@ -1016,14 +920,15 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
       const distance = calculateManhattanDistance(sourcePosition, targetPosition);
       
       if (sourcePosition.row === targetPosition.row && 
-        sourcePosition.col === targetPosition.col) return 0;
+          sourcePosition.col === targetPosition.col) return 0;
+
       // 範囲2マス内の通常の強化効果
-      if (distance <= effect.fieldEffect.range) {
+      if (distance <= (effect.fieldEffect?.range || 2)) {
         if (isSameType(sourceCard, targetCard.card)) {
           if (targetCard.card.category === 'support') {
-            return effect.fieldEffect.supportBonus;
+            return effect.fieldEffect?.supportBonus || 0;
           }
-          return effect.fieldEffect.allyBonus;
+          return effect.fieldEffect?.allyBonus || 0;
         }
       }
     
@@ -1031,9 +936,12 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
     }
 
     case 'LEGENDARY_DUAL_SWORDSMAN': {
+      if (!effect.verticalEffect) return 0;
+      
       // 縦横の効果
       if (isVerticallyAdjacent(sourcePosition, targetPosition) ||
-          (sourcePosition.row === targetPosition.row && Math.abs(sourcePosition.col - targetPosition.col) === 1)) {
+          (sourcePosition.row === targetPosition.row && 
+           Math.abs(sourcePosition.col - targetPosition.col) === 1)) {
         
         if (isSameType(sourceCard, targetCard.card)) {
           return effect.verticalEffect.power;
@@ -1195,8 +1103,11 @@ function countEnemiesInRange(
 }
 
 export function getEffectStyle(effect: Effect): EffectStyle {
-  if ('targetClass' in effect && effect.type.startsWith('VERTICAL_BOOST' || 
-      'HORIZONTAL_BOOST' || 'DIAGONAL_BOOST' || 'CROSS_FORMATION')) {
+  if ('targetClass' in effect && 
+    (effect.type.startsWith('VERTICAL_BOOST') || 
+     effect.type.startsWith('HORIZONTAL_BOOST') || 
+     effect.type.startsWith('DIAGONAL_BOOST') || 
+     effect.type.startsWith('CROSS_FORMATION'))) {
     return {
       color: '#FFC107',
       pattern: getWeaponPattern(effect.type),
@@ -1316,6 +1227,9 @@ function getLegendaryPattern(type: string): keyof typeof EFFECT_PATTERNS {
 function calculateBossEffectValue(context: EffectContext, effect: BossEffect): number {
   const { sourceCard, targetCard, sourcePosition, targetPosition, board } = context;
 
+  const powerPerWeakened = effect.secondaryEffect?.powerPerWeakened ?? 0;
+
+
   switch (effect.type) {
     case 'BOSS_IFRIT': {
       // 自分自身への効果（弱体化した敵の数による強化）
@@ -1335,14 +1249,15 @@ function calculateBossEffectValue(context: EffectContext, effect: BossEffect): n
           });
         });
 
-        return weakenedCount * effect.secondaryEffect.powerPerWeakened;
+        return weakenedCount * powerPerWeakened;
       }
 
       // 敵への弱体化効果
       if (targetCard.card.type !== sourceCard.type) {
         const distance = calculateManhattanDistance(sourcePosition, targetPosition);
         if (distance <= (effect.primaryEffect.range || 2)) {
-          return effect.primaryEffect.enemyPenalty;
+          return effect.primaryEffect?.enemyPenalty ?? 0;
+
         }
       }
 
@@ -1360,18 +1275,18 @@ function calculateBossEffectValue(context: EffectContext, effect: BossEffect): n
   }
 }
 
-export function getEffectPriority(effect: Effect): number {
-  if (effect.type.startsWith('LEADER_')) return EFFECT_PRIORITIES.LEADER;
+export function getEffectPriority(effect: Effect | BaseEffect): number {
   if ('targetClass' in effect) return EFFECT_PRIORITIES.WEAPON;
   if (isFieldEffect(effect)) return EFFECT_PRIORITIES.FIELD;
   
-  switch (effect.type) {
-    case 'UNIT_VERTICAL_ALLY_BOOST': return EFFECT_PRIORITIES.UNIT;
-    case 'DIAGONAL_DEBUFF':
-    case 'ADJACENT_UNIT_DEBUFF': return EFFECT_PRIORITIES.DEBUFF;
-    case 'SELF_POWER_UP_BY_ADJACENT_ALLY': return EFFECT_PRIORITIES.BASE;
-    default: return 0;
-  }
+  // 文字列から判定
+  const type = effect.type;
+  if (type.startsWith('LEADER_')) return EFFECT_PRIORITIES.LEADER;
+  if (type.startsWith('LEGENDARY_')) return EFFECT_PRIORITIES.LEGENDARY;
+  if (type.includes('BUFF')) return EFFECT_PRIORITIES.UNIT;
+  if (type.includes('DEBUFF')) return EFFECT_PRIORITIES.DEBUFF;
+  
+  return EFFECT_PRIORITIES.BASE;
 }
 
 export function getDirection(from: Position, to: Position): 'vertical' | 'horizontal' | 'diagonal' | null {

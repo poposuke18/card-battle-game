@@ -42,6 +42,8 @@ import type { Card, CardType } from '@/types';
     }
   }
   
+
+  
   // カードタイプでフィルタリングする関数
   function filterCardsByType(cards: Card[], type: CardType): Card[] {
     return cards.filter(card => card.type === type);
@@ -88,7 +90,7 @@ export function generateHandWithStageBonus(turn: TurnNumber, stage: number): Car
     const allyHand = pickRandomCards(alliedCards, turnConfig.ally);
     const enemyHand = pickRandomCards(enemyCards, turnConfig.enemy).map(card => {
       // 敵カードにステージ補正を適用
-      const stageMultiplier = STAGE_ENEMY_RATE[stage] || 1;
+      const stageMultiplier = STAGE_ENEMY_RATE[stage as keyof typeof STAGE_ENEMY_RATE] || 1;
       return {
         ...card,
         points: Math.floor(card.points * stageMultiplier),

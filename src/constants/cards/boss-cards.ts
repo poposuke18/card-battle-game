@@ -6,7 +6,7 @@ import type { Card} from '@/types';
 // ボス用の特別な計算（ステージ依存）
 function calculateBossPoints(basePoint: number, stage: number): number {
   const bossMultiplier = 3.5;
-  const stageMultiplier = STAGE_ENEMY_RATE[stage] || 1;
+  const stageMultiplier = STAGE_ENEMY_RATE[stage as keyof typeof STAGE_ENEMY_RATE] || 1;
   return Math.floor(basePoint * bossMultiplier * stageMultiplier);
 }
 
@@ -80,19 +80,17 @@ const STAGE3_BOSS: Card = createCard({
     primaryEffect: {
       name: 'タイダルウェーブ',
       pattern: 'wave',
-      range: 'full',
+      range: 2,  // 'full' を数値に変更
       enemyPenalty: -EFFECT_VALUES.FIELD * 2,
       movement: true,
       description: '波状に広がる効果で敵を押し流し弱体化'
     },
     secondaryEffect: {
-      type: 'FIELD_FLOOD',
-      duration: 2,
-      fieldDebuff: -Math.floor(EFFECT_VALUES.FIELD),
+      powerPerWeakened: EFFECT_VALUES.FIELD,  // type を削除
       description: '2ターンの間、フィールド全体が水没し敵ユニットが弱体化'
     },
     ultimateEffect: {
-      type: 'TSUNAMI',
+      name: 'TSUNAMI',  // type を name に変更
       power: EFFECT_VALUES.FIELD * 3,
       targetDirection: 'all',
       effectNullification: true,
@@ -116,8 +114,7 @@ const STAGE4_BOSS: Card = createCard({
     primaryEffect: {
       name: 'ギュンギニル',
       pattern: 'pierce',
-      range: 'full',
-      power: EFFECT_VALUES.FIELD * 4,
+      range: 2,
       penetration: true,
       description: '直線上の敵を貫通する必殺の一撃'
     },
@@ -138,44 +135,6 @@ const STAGE4_BOSS: Card = createCard({
   turn: 8
 });
 
-// ステージ5のボス：ヨルムンガンド（世界蛇）
-const STAGE5_BOSS: Card = createCard({
-  id: generateCardId('unit', 'enemy', 85),
-  name: '世界蛇ヨルムンガンド',
-  type: 'enemy',
-  category: 'unit',
-  class: 'lancer',
-  points: calculateBossPoints(BASE_POINTS.UNIT.warrior, 5),
-  effect: {
-    type: 'BOSS_JORMUNGANDR',
-    primaryEffect: {
-      name: '終末の毒',
-      pattern: 'spiral',
-      range: 'full',
-      poisonEffect: {
-        damage: EFFECT_VALUES.FIELD,
-        duration: 3
-      },
-      description: '螺旋状に広がる猛毒で敵を蝕む'
-    },
-    secondaryEffect: {
-      name: '世界を廻る体',
-      selfEffect: {
-        powerPerPoison: EFFECT_VALUES.FIELD * 2
-      },
-      description: '毒状態の敵の数に応じて自身が強化'
-    },
-    ultimateEffect: {
-      name: 'ラグナロクの前触れ',
-      globalDebuff: true,
-      effectNullification: true,
-      fieldDestruction: true,
-      description: '全ての加護を無効化し、フィールドを完全に破壊する'
-    },
-    description: '世界の果てより目覚めし蛇は、その毒で世界の終わりをもたらす'
-  },
-  turn: 8
-});
 
 export const TURN8_CARDS = [STAGE1_BOSS];  // 最初は1ステージ目のボスだけを使用
 
@@ -184,7 +143,6 @@ export const BOSS_CARDS: Record<number, Card> = {
   2: STAGE2_BOSS,
   3: STAGE3_BOSS,
   4: STAGE4_BOSS,
-  5: STAGE5_BOSS
 };
 
 // ステージに応じたボスカードを取得する関数

@@ -7,7 +7,8 @@ import {
   getEffectStyle, 
   getEffectDetails, 
   calculateDistance,
-  getDirection
+  getDirection,
+  getEffectRange
 } from '@/utils/effects/index';
 import { getClassIcon } from '@/utils/common';  // getClassDisplayNameを追加
 
@@ -142,7 +143,7 @@ export function EffectPattern({ type, color }: { type: string; color: string }) 
 // 効果範囲表示用のオーバーレイコンポーネント
 export function EffectRangeOverlay({ 
   card, 
-  position 
+  position,
 }: { 
   card: PlacedCard;
   position: Position;
@@ -150,11 +151,8 @@ export function EffectRangeOverlay({
 }) {
   if (!card.card.effect) return null;
 
-  const details = getEffectDetails(card.card);
-  if (!details) return null;
-
   const style = getEffectStyle(card.card.effect);
-  const affectedPositions = details.range;
+  const range = getEffectRange(card.card.effect, position);
 
   return (
     <>
@@ -168,7 +166,7 @@ export function EffectRangeOverlay({
         <EffectPattern type={style.pattern} color={style.color} />
       </div>
 
-      {affectedPositions.map((pos: { row: number; col: number; }, index: number) => (
+      {range.map((pos, index) => (
         <motion.div
           key={`effect-${pos.row}-${pos.col}`}
           className="absolute rounded-lg pointer-events-none"
@@ -238,14 +236,14 @@ export function EffectLine({
 export const EffectIcon = memo(({ effect, className = '' }: { effect: Effect; className?: string }) => {
   const style = getEffectStyle(effect);
   const details = getEffectDetails({ 
-    id: 'temp-id',
+    id: 'temp',
     name: 'temp',
     type: 'ally',
     category: 'unit',
     points: 0,
     turn: 1,
     effect 
-  } as Card);  
+  } as Card);
   if (!details) return null;
 
   if (isFieldEffect(effect)) {
@@ -290,7 +288,17 @@ export const EffectDescription = memo(({
   board?: (PlacedCard | null)[][] | null;
   position?: Position | null;
 }) => {
-  const details = getEffectDetails(effect);
+  // 一時的なカードオブジェクトを作成
+  const tempCard: Card = {
+    id: `temp-${Date.now()}`,
+    name: 'temporary',
+    type: 'ally',
+    category: 'unit',
+    points: 0,
+    turn: 1,
+    effect
+  };
+  const details = getEffectDetails(tempCard);
   
   if (!details) return <span className={className}>効果なし</span>;
 

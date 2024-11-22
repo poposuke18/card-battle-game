@@ -136,7 +136,7 @@ export function getEffectPattern(effectType: string, className?: string, color?:
 }
 
 // コンポーネントとしてのEffectPattern
-type EffectPatternProps = {
+export type EffectPatternProps = {
   type: string;
   className?: string;
   color?: string;

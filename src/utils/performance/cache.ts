@@ -24,6 +24,17 @@ class Cache {
   set(key: CacheKey, value: CacheValue): void {
     this.cleanStaleEntries();
 
+    // 最も古いキーを見つける
+    let oldestKey: CacheKey | null = null;
+    let oldestTimestamp = Date.now();
+
+    for (const [k, entry] of this.cache.entries()) {
+      if (entry.timestamp < oldestTimestamp) {
+        oldestTimestamp = entry.timestamp;
+        oldestKey = k;
+      }
+    }
+
     if (this.cache.size >= this.maxSize && oldestKey) {
       this.cache.delete(oldestKey);
     }
@@ -33,38 +44,8 @@ class Cache {
       timestamp: Date.now()
     });
   }
-
-  get(key: CacheKey): CacheValue | null {
-    const entry = this.cache.get(key);
-    
-    if (!entry) return null;
-    
-    if (this.isStale(entry.timestamp)) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.value;
-  }
-
-  private isStale(timestamp: number): boolean {
-    return Date.now() - timestamp > this.ttl;
-  }
-
-  private cleanStaleEntries(): void {
-    for (const [key, entry] of this.cache.entries()) {
-      if (this.isStale(entry.timestamp)) {
-        this.cache.delete(key);
-      }
-    }
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
-
-  size(): number {
-    return this.cache.size;
+  cleanStaleEntries() {
+    throw new Error("Method not implemented.");
   }
 }
 

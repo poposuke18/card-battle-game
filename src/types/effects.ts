@@ -208,22 +208,31 @@ export type EffectResult = {
 export type BossEffect = {
   type: BossEffectType;
   primaryEffect: {
+    name?: string;
     range?: number;
+    poisonEffect?: number;
+    penetration?: boolean;
     enemyPenalty?: number;
+    movement?: boolean;
     pattern?: string;
     allyBonus?: number;
     weaponNullification?: boolean;
     description?: string;
   };
   secondaryEffect: {
+    name?: string;
     powerPerWeakened?: number;
+    moveRange?: number;
     allyBoost?: number;
+    afterEffect?: boolean;
     targetDirection?: string;
     description?: string;
   };
   ultimateEffect?: {
     name?: string;
     damage?: number;
+    duration?: number;
+    globalEffect?: boolean;
     pattern?: string;
     description?: string;
     power?: number;
