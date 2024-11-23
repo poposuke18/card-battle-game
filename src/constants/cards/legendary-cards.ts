@@ -110,37 +110,37 @@ export const TURN7_CARDS: Card[] = [
     effect: {
       type: 'LEGENDARY_DUAL_SWORDSMAN',
       primaryEffect: {
-        type: 'DUAL_STRIKE',
-        power: EFFECT_VALUES.VERTICAL * 1.5
+        type: 'VERTICAL_DEBUFF',
+        power: 120 // 弱体化の値は正の数で定義し、計算時に負にする
       },
       secondaryEffect: {
-        type: 'HORIZONTAL_STRIKE',
+        type: 'NONE',
         range: 1,
-        effectMultiplier: 2
+        effectMultiplier: 1
       },
       fieldEffect: {
-        range: 2,
-        allyBonus: EFFECT_VALUES.FIELD,
-        enemyPenalty: -EFFECT_VALUES.FIELD * 2,
-        supportBonus: EFFECT_VALUES.FIELD
+        range: 1,
+        allyBonus: 0,
+        enemyPenalty: 0,
+        supportBonus: 0
       },
       weaponEffect: {
-        range: 2,
-        effectMultiplier: 2
+        range: 1,
+        effectMultiplier: 1
       },
       horizontalEffect: {
-        power: EFFECT_VALUES.HORIZONTAL * 2,
-        debuff: -EFFECT_VALUES.HORIZONTAL * 2
+        power: 0,
+        debuff: 0
       },
       crossEffect: {
-        allyBonus: EFFECT_VALUES.ADJACENT,
-        enemyPenalty: -EFFECT_VALUES.ADJACENT * 2
+        allyBonus: 0,
+        enemyPenalty: 0
       },
       selfEffect: {
-        powerPerEnemy: EFFECT_VALUES.ADJACENT,
-        range: 2
+        powerPerEnemy: 0,
+        range: 1
       },
-      description: '伝説の二刀流で縦横無尽に戦場を駆ける'
+      description: '縦方向に隣接する敵ユニットに強力な弱体化効果を与える'
     } as LegendaryEffect,
     turn: 7
   }),
@@ -152,7 +152,7 @@ export const TURN7_CARDS: Card[] = [
     type: 'enemy',
     category: 'unit',
     class: 'knight',
-    points: calculateLegendaryPoints(BASE_POINTS.UNIT.knight, 'enemy'),
+    points: calculateLegendaryPoints(BASE_POINTS.UNIT.knight * 0.8, 'enemy'),
     effect: {
       type: 'LEGENDARY_CHAOS_DRAGON',
       primaryEffect: {
@@ -198,7 +198,7 @@ export const TURN7_CARDS: Card[] = [
     type: 'enemy',
     category: 'unit',
     class: 'mage',
-    points: calculateLegendaryPoints(BASE_POINTS.UNIT.mage, 'enemy'),
+    points: calculateLegendaryPoints(BASE_POINTS.UNIT.mage * 0.8, 'enemy'),
     effect: {
       type: 'LEGENDARY_ARCHMAGE',
       primaryEffect: {
@@ -244,7 +244,7 @@ export const TURN7_CARDS: Card[] = [
     type: 'enemy',
     category: 'unit',
     class: 'warrior',
-    points: calculateLegendaryPoints(BASE_POINTS.UNIT.warrior, 'enemy'),
+    points: calculateLegendaryPoints(BASE_POINTS.UNIT.warrior * 0.8, 'enemy'),
     effect: {
       type: 'LEGENDARY_DEMON_EMPEROR',
       primaryEffect: {

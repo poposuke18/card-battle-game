@@ -69,7 +69,7 @@ export const TURN6_CARDS: Card[] = [
     type: 'ally',
     category: 'unit',
     class: 'warrior',
-    points: calculateCardPoints(BASE_POINTS.UNIT.warrior, 'ally', 6, 1, true),
+    points: calculateCardPoints(BASE_POINTS.UNIT.warrior * 2.5, 'ally', 6, 1, true),
     turn: 6
   }),
 

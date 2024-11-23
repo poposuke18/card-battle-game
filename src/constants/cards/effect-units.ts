@@ -69,7 +69,7 @@ export const TURN2_CARDS: Card[] = [
     points: calculateCardPoints(BASE_POINTS.UNIT.warrior, 'enemy', 2, 1, true),
     effect: {
       type: 'UNIT_VERTICAL_ENEMY_DEBUFF',
-      power: EFFECT_VALUES.VERTICAL * 1.5  // 敵は効果も強い
+      power: EFFECT_VALUES.VERTICAL * 1.5 
     },
     turn: 2
   }),
@@ -82,7 +82,7 @@ export const TURN2_CARDS: Card[] = [
     points: calculateCardPoints(BASE_POINTS.UNIT.guardian, 'enemy', 2, 1, true),
     effect: {
       type: 'SELF_POWER_UP_BY_ADJACENT_ALLY',
-      power: EFFECT_VALUES.ADJACENT * 1.2
+      power: EFFECT_VALUES.ADJACENT * 1.5
     },
     turn: 2
   }),

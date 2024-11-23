@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { PlacedCard, Position } from '@/types';
-import { getEffectStyle, getEffectRange } from '@/utils/effects/index';
+import { getEffectStyle, } from '@/utils/effects/index';
 
 export type EffectRangeOverlayProps = {
   card: PlacedCard;
@@ -13,13 +13,11 @@ export type EffectRangeOverlayProps = {
 
 export const EffectRangeOverlay = memo(({
   card,
-  position
 }: EffectRangeOverlayProps) => {
   if (!card.card.effect) return null;
 
   const style = getEffectStyle(card.card.effect);
   const { color, intensity, pattern } = style;
-  const range = getEffectRange(card.card.effect, position);
 
   // エフェクトの種類に応じたパターンのSVG定義
   const getPatternSvg = () => {
@@ -142,52 +140,6 @@ export const EffectRangeOverlay = memo(({
         />
       </svg>
 
-      {/* 効果範囲のアニメーション */}
-      {range.map((pos, index) => (
-        <motion.div
-          key={`effect-${pos.row}-${pos.col}`}
-          className="absolute rounded-lg pointer-events-none transform"
-          style={{ 
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            left: `${(pos.col - position.col) * 100}%`,
-            top: `${(pos.row - position.row) * 100}%`,
-            backgroundColor: style.color,
-            opacity: 0,
-            zIndex: 20  // 上のレイヤーに表示
-          }}
-          animate={{ 
-            opacity: [0.1, 0.2, 0.1]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: index * 0.1
-          }}
-        />
-      ))}
-
-      {/* リーダー/伝説カードのエフェクト */}
-      {(card.card.effect.type.startsWith('LEADER_') || 
-        card.card.effect.type.startsWith('LEGENDARY_')) && (
-        <motion.div
-          className="absolute inset-0 rounded-lg"
-          style={{
-            backgroundColor: color,
-            opacity: 0,
-            zIndex: 30  // 最前面に表示
-          }}
-          animate={{
-            opacity: [0, intensity * 0.2, 0]
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      )}
     </motion.div>
   );
 });

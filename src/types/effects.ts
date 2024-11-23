@@ -147,6 +147,7 @@ export type EffectWithType = BaseEffect | WeaponEffect | LeaderEffect | Legendar
 
 
 export type LegendaryEffect = {
+  range: number;
   type: LegendaryEffectType;  // This should match the LegendaryEffectType union
   description: string;
   primaryEffect: {

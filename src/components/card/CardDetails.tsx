@@ -68,13 +68,18 @@ export function CardDetails({
       }
 
       else if (card.card.effect.type === 'SELF_POWER_UP_BY_ADJACENT_ALLY') {
-        const value = calculateEffectValue(context, card.card.effect);
-        if (value !== 0) {
+        // 隣接する味方の数を数える
+        const adjacentAllies = countAdjacentAllies(position, board, card.card.type);
+        // 効果値の計算
+        const powerUp = (card.card.effect.power || 0) * adjacentAllies;
+      
+        if (powerUp > 0) {
           effects.push({
             sourceCard: card,
             sourcePosition: position,
-            effectValue: value,
-            effectType: 'SELF_EFFECT_BASE'
+            effectValue: powerUp,
+            effectType: 'SELF_EFFECT_BASE',
+            description: `隣接する味方${adjacentAllies}体による強化`
           });
         }
       }

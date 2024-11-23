@@ -302,6 +302,89 @@ export function getEffectRange(effect: Effect, position: Position): Position[] {
 
   if (!effect) return positions;
 
+  if (effect.type.startsWith('LEGENDARY_')) {
+    switch (effect.type) {
+      case 'LEGENDARY_DRAGON_KNIGHT': {
+        // 十字方向の隣接効果と武器強化の範囲2
+        const crossPositions = [
+          offset(-1, 0), offset(1, 0),
+          offset(0, -1), offset(0, 1)
+        ];
+        for (let r = -2; r <= 2; r++) {
+          for (let c = -2; c <= 2; c++) {
+            if (Math.abs(r) + Math.abs(c) <= 2) { // マンハッタン距離で2以内
+              positions.push(offset(r, c));
+            }
+          }
+        }
+        return [...new Set([...crossPositions, ...positions])].filter(pos => isPositionValid(pos));
+      }
+
+      case 'LEGENDARY_SAGE': {
+        // 範囲2マスの全方向効果
+        for (let r = -2; r <= 2; r++) {
+          for (let c = -2; c <= 2; c++) {
+            if (Math.abs(r) + Math.abs(c) <= 2) { // マンハッタン距離で2以内
+              positions.push(offset(r, c));
+            }
+          }
+        }
+        return positions.filter(pos => isPositionValid(pos));
+      }
+
+      case 'LEGENDARY_DUAL_SWORDSMAN': {
+        // 縦横方向の効果
+        return [
+          offset(-1, 0), offset(1, 0),  // 縦方向
+        ].filter(pos => isPositionValid(pos));
+      }
+
+      case 'LEGENDARY_CHAOS_DRAGON': {
+        // 十字方向の効果と範囲2マスの弱体化
+        const crossPositions = [
+          offset(-1, 0), offset(1, 0),
+          offset(0, -1), offset(0, 1)
+        ];
+        for (let r = -2; r <= 2; r++) {
+          for (let c = -2; c <= 2; c++) {
+            if (Math.abs(r) + Math.abs(c) <= 2) { // マンハッタン距離で2以内
+              positions.push(offset(r, c));
+            }
+          }
+        }
+        return [...new Set([...crossPositions, ...positions])].filter(pos => isPositionValid(pos));
+      }
+
+      case 'LEGENDARY_ARCHMAGE': {
+        // 範囲2マスの効果と武器強化
+        for (let r = -2; r <= 2; r++) {
+          for (let c = -2; c <= 2; c++) {
+            if (Math.abs(r) + Math.abs(c) <= 2) { // マンハッタン距離で2以内
+              positions.push(offset(r, c));
+            }
+          }
+        }
+        return positions.filter(pos => isPositionValid(pos));
+      }
+
+      case 'LEGENDARY_DEMON_EMPEROR': {
+        // 十字方向の効果と範囲2マスの自己強化
+        const crossPositions = [
+          offset(-1, 0), offset(1, 0),
+          offset(0, -1), offset(0, 1)
+        ];
+        const range = effect.selfEffect?.range || 2;
+        for (let r = -range; r <= range; r++) {
+          for (let c = -range; c <= range; c++) {
+            if (r === 0 && c === 0) continue;
+            positions.push(offset(r, c));
+          }
+        }
+        return [...new Set([...crossPositions, ...positions])].filter(pos => isPositionValid(pos));
+      }
+    }
+  }
+
   if (isFieldEffect(effect)) {
     return [
       offset(-2, 0),
@@ -936,18 +1019,11 @@ function calculateLegendaryEffectValue(context: EffectContext, effect: Legendary
     }
 
     case 'LEGENDARY_DUAL_SWORDSMAN': {
-      if (!effect.verticalEffect) return 0;
-      
-      // 縦横の効果
-      if (isVerticallyAdjacent(sourcePosition, targetPosition) ||
-          (sourcePosition.row === targetPosition.row && 
-           Math.abs(sourcePosition.col - targetPosition.col) === 1)) {
-        
-        if (isSameType(sourceCard, targetCard.card)) {
-          return effect.verticalEffect.power;
-        } else {
-          return effect.verticalEffect.debuff;
-        }
+      // 縦方向に隣接する敵への弱体化効果
+      if (isVerticallyAdjacent(sourcePosition, targetPosition) && 
+          !isSameType(sourceCard, targetCard.card) &&
+          targetCard.card.category === 'unit') {
+        return -effect.primaryEffect.power; // 定義された値を使用して負の値に変換
       }
       return 0;
     }

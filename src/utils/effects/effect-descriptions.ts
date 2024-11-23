@@ -152,7 +152,7 @@ export function getEffectDetails(input: Card): EffectDetails | null {
         const range = effect.range || 1;
         const multiplier = effect.effectMultiplier || 2;
         const powerBonus = effect.power || 0;
-        return `周囲${range}マスの武器カードの効果を${multiplier}倍に増幅し、${powerBonus}強化z`;
+        return `周囲${range}マスの武器カードの効果を${multiplier}倍に増幅し、${powerBonus}強化`;
       }
   
       default:
@@ -195,19 +195,19 @@ export function getEffectDetails(input: Card): EffectDetails | null {
   export function getLegendaryEffectDescription(effect: EffectWithType): string {
     switch (effect.type) {
       case 'LEGENDARY_DRAGON_KNIGHT':
-        return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.secondaryEffect.range}マス以内の武器効果を${effect.secondaryEffect.effectMultiplier}倍に増幅`;
+        return `隣接する味方を${effect.primaryEffect.power}強化し、◇範囲2マス以内の武器効果を${effect.secondaryEffect.effectMultiplier}倍に増幅`;
       
       case 'LEGENDARY_SAGE':
-        return `範囲${effect.fieldEffect.range}マスの味方を${effect.fieldEffect.allyBonus}強化、サポートを${effect.fieldEffect.supportBonus}強化し、隣接する味方のマイナス効果を無効化`;
+        return `◇範囲2マスの味方を${effect.fieldEffect.allyBonus}強化、サポートを${effect.fieldEffect.supportBonus}強化し、隣接する味方のマイナス効果を無効化`;
       
       case 'LEGENDARY_DUAL_SWORDSMAN':
-        return `縦横の味方を${effect.primaryEffect.power}強化し、敵を${Math.abs(effect.secondaryEffect.effectMultiplier)}弱体化`;
+        return `縦方向敵を${Math.abs(effect.primaryEffect.power)}弱体化`;
       
       case 'LEGENDARY_CHAOS_DRAGON':
-        return `隣接する味方を${effect.primaryEffect.power}強化し、範囲${effect.fieldEffect.range}マスの敵ユニットを${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化`;
+        return `隣接する味方を${effect.primaryEffect.power}強化し、◇範囲2マスの敵ユニットを${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化`;
   
       case 'LEGENDARY_ARCHMAGE':
-        return `範囲${effect.fieldEffect.range}マスの味方ユニットを${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍`;
+        return `◇範囲2マスの味方ユニットを${effect.fieldEffect.allyBonus}強化し、敵を${Math.abs(effect.fieldEffect.enemyPenalty)}弱体化。武器効果を${effect.weaponEffect.effectMultiplier}倍`;
   
       case 'LEGENDARY_DEMON_EMPEROR':
         return `十字方向の味方ユニットを${effect.crossEffect.allyBonus}強化、敵を${Math.abs(effect.crossEffect.enemyPenalty)}弱体化。

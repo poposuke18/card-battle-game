@@ -83,7 +83,7 @@ export const TURN5_CARDS: Card[] = [
     points: calculateCardPoints(BASE_POINTS.UNIT.knight, 'enemy', 5, 1, true),
     effect: {
       type: 'ADJACENT_UNIT_BUFF',
-      power: EFFECT_VALUES.ADJACENT * 1.8,
+      power: EFFECT_VALUES.ADJACENT * 2,
       range: 1
     },
     turn: 5

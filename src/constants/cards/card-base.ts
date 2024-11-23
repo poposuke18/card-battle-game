@@ -13,7 +13,7 @@ export const BASE_POINTS = {
     guardian: 110    // 防御型
   },
   FIELD: 80,         // フィールド効果
-  WEAPON: 50,        // 武器強化
+  WEAPON: 20,        // 武器強化
   SUPPORT: 40        // サポート効果
 } as const;
 
