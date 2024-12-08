@@ -22,7 +22,7 @@ type GameControllerProps = {
 export function GameController({ initialStage }: GameControllerProps) {
   const params = useParams();
   const currentStage = Number(params.stage) || 1;
-  const { gameState, actions } = useGameState(initialStage);
+  const { gameState, actions } = useGameState(currentStage);
   const { clearStage } = useGameProgress();
   const { hoveredPosition, setHoveredPosition, effectRange } = useEffects(gameState.board);
   const [showTurnTransition, setShowTurnTransition] = useState(false);
