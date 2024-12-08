@@ -1,12 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'export',  // 追加: 静的エクスポートを有効化
+  output: 'export',  // Static HTMLエクスポートのために必要
   images: {
-    unoptimized: true,
+    unoptimized: true,  // GitHub Pages用の設定
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' 
+    ? '/card-battle-game'  // リポジトリ名を指定
+    : '',
+  basePath: process.env.NODE_ENV === 'production' 
+    ? '/card-battle-game'  // リポジトリ名を指定
+    : '',
 }
 
 module.exports = nextConfig
