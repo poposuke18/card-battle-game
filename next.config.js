@@ -1,14 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',  // 静的エクスポートを有効化
+  output: 'export',
   images: {
-    unoptimized: true,  // 静的エクスポート用の設定
+    unoptimized: true,
   },
   basePath: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
-  // リポジトリ名と一致させる必要があります
   assetPrefix: process.env.NODE_ENV === 'production' ? '/card-battle-game' : '',
-  // 動的ルートの生成を設定
   trailingSlash: true,
+  // 静的ページの生成設定を追加
+  generateStaticParams: async () => {
+    return [
+      { stage: '1' },
+      { stage: '2' },
+      { stage: '3' },
+      { stage: '4' }
+    ]
+  }
 }
 
 module.exports = nextConfig

@@ -16,7 +16,8 @@ export default function TitleScreen() {
   const handleStageSelect = (stage: number) => {
     setSelectedStage(stage);
     setTimeout(() => {
-      window.location.href = `/game?stage=${stage}`;
+      window.location.href = `${process.env.NODE_ENV === 'production' ? '/card-battle-game' : ''}/game/${stage}`;
+
     }, 1500);
   };
 
