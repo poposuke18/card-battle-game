@@ -1,4 +1,5 @@
 // src/components/game/GameController.tsx
+'use client';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,12 +13,12 @@ import { useGameProgress } from '@/hooks/useGameProgress';  // 追加：ステ�
 import { useEffects } from '@/hooks/useEffects';  // 追加：効果範囲表示用
 import type { PlacedCard, Position } from '@/types';
 import DebugCardList from '@/components/debug/DebugCardList';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 
 export function GameController() {
-  const searchParams = useSearchParams();
-  const currentStage = Number(searchParams.get('stage')) || 1;
+  const params = useParams();
+  const currentStage = Number(params.stage) || 1;
   const { gameState, actions } = useGameState(currentStage);
   const { clearStage } = useGameProgress();
   const { hoveredPosition, setHoveredPosition, effectRange } = useEffects(gameState.board);
