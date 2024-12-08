@@ -71,11 +71,31 @@ export function GameController({ initialStage }: GameControllerProps) {
     actions.selectCard(card);
   }, [actions]);
 
-  useEffect(() => {
+// GameController.tsxのuseEffect内
+useEffect(() => {
+  const initializeAudio = async () => {
     const soundManager = SoundManager.getInstance();
-    soundManager.playBGM();
-    return () => soundManager.pauseBGM();
-  }, []);
+    await soundManager.initialize();
+    await soundManager.playBGM();
+  };
+
+  // ユーザーインタラクションを待つ
+  const handleUserInteraction = async () => {
+    await initializeAudio();
+    document.removeEventListener('click', handleUserInteraction);
+    document.removeEventListener('touchstart', handleUserInteraction);
+  };
+
+  document.addEventListener('click', handleUserInteraction);
+  document.addEventListener('touchstart', handleUserInteraction);
+
+  return () => {
+    document.removeEventListener('click', handleUserInteraction);
+    document.removeEventListener('touchstart', handleUserInteraction);
+    const soundManager = SoundManager.getInstance();
+    soundManager.pauseBGM();
+  };
+}, []);
 
   useEffect(() => {
     if (gameState.status.gameOver) {
