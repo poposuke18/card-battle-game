@@ -15,11 +15,14 @@ import type { PlacedCard, Position } from '@/types';
 import DebugCardList from '@/components/debug/DebugCardList';
 import { useParams } from 'next/navigation';
 
+type GameControllerProps = {
+  initialStage: number;
+};
 
-export function GameController() {
+export function GameController({ initialStage }: GameControllerProps) {
   const params = useParams();
   const currentStage = Number(params.stage) || 1;
-  const { gameState, actions } = useGameState(currentStage);
+  const { gameState, actions } = useGameState(initialStage);
   const { clearStage } = useGameProgress();
   const { hoveredPosition, setHoveredPosition, effectRange } = useEffects(gameState.board);
   const [showTurnTransition, setShowTurnTransition] = useState(false);
