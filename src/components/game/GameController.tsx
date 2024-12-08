@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Board } from '@/components/board';
 import { CardDetails } from '@/components/card/CardDetails';
@@ -10,8 +10,11 @@ import { TurnTransition } from '@/components/game/TurnTransition';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { useEffects } from '@/hooks/useEffects';
-import type { PlacedCard, Position } from '@/types';
+import type { Card, PlacedCard, Position } from '@/types';
 import DebugCardList from '@/components/debug/DebugCardList';
+import { SoundManager } from '@/utils/sound/SoundManager';
+import { SoundControl } from '../ui/SoundControl';
+
 
 type GameControllerProps = {
   initialStage: number;
@@ -27,15 +30,22 @@ export function GameController({ initialStage }: GameControllerProps) {
     position: Position;
   } | null>(null);
 
-  const handlePlaceCard = async (position: Position) => {
+
+
+  const placeCard = useCallback((position: Position) => {
     if (!gameState.selectedCard) return;
     if (gameState.board[position.row][position.col]) return;
 
+    const soundManager = SoundManager.getInstance();
+    soundManager.playSFX('card-place');
     actions.placeCard(position);
-  };
+  }, [gameState.selectedCard, gameState.board, actions]);
 
   const handleEndTurn = () => {
     if (!gameState.canEndTurn) return;
+    
+    const soundManager = SoundManager.getInstance();
+    soundManager.playSFX('turn-end');
     
     setShowTurnTransition(true);
     setTimeout(() => {
@@ -55,8 +65,36 @@ export function GameController({ initialStage }: GameControllerProps) {
     }
   };
 
+  const handleCardSelect = useCallback((card: Card) => {
+    const soundManager = SoundManager.getInstance();
+    soundManager.playSFX('card-flip');
+    actions.selectCard(card);
+  }, [actions]);
+
+  useEffect(() => {
+    const soundManager = SoundManager.getInstance();
+    soundManager.playBGM();
+    return () => soundManager.pauseBGM();
+  }, []);
+
+  useEffect(() => {
+    if (gameState.status.gameOver) {
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSFX(gameState.status.winner === 'ally' ? 'victory' : 'defeat');
+    }
+  }, [gameState.status.gameOver, gameState.status.winner]);
+
+  // エフェクト発動時の効果音
+  useEffect(() => {
+    if (hoveredCard?.card.card.effect) {  // card.card としてアクセス
+      const soundManager = SoundManager.getInstance();
+      soundManager.playSFX('effect-trigger');
+    }
+  }, [hoveredCard]);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100">
+          <SoundControl />  {/* これを追加 */}
       <AnimatePresence>
         {showTurnTransition && (
           <TurnTransition 
@@ -110,7 +148,7 @@ export function GameController({ initialStage }: GameControllerProps) {
                       key={card.id}
                       card={card}
                       isSelected={gameState.selectedCard?.id === card.id}
-                      onClick={() => actions.selectCard(card)}
+                      onClick={() => handleCardSelect(card)}  // ここを変更
                       index={index}
                       isNew={true}
                       board={gameState.board}
@@ -127,7 +165,7 @@ export function GameController({ initialStage }: GameControllerProps) {
             <Board
               board={gameState.board}
               selectedCard={gameState.selectedCard}
-              onPlaceCard={handlePlaceCard}
+              onPlaceCard={placeCard}  // handlePlaceCardからplaceCardに変更
               onHoverCard={setHoveredCard}
               effectRange={effectRange}
               hoveredPosition={hoveredPosition}

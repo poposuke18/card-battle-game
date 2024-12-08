@@ -1,5 +1,150 @@
 # Card Battle Game
 
+## 12/9 更新
+
+5x5のグリッドで展開される戦略的カードバトルゲームです。各ステージで強力なボスと対峙し、戦略的なカード配置で勝利を目指します。
+
+## デモ
+[ゲームをプレイする](https://card-battle-game.vercel.app/)
+
+## 技術スタック
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Local Storage (進行状況の保存)
+- Web Audio API (ゲーム音楽と効果音)
+
+## ファイル構成
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── page.tsx                 # タイトル画面
+│   ├── game/
+│   │   └── page.tsx            # メインゲーム画面
+│   └── layout.tsx              # 共通レイアウト
+│
+├── components/
+│   ├── board/                   # ゲームボード関連
+│   │   ├── Board.tsx           # メインボード
+│   │   ├── PlacedCardContent   # 配置済カード表示
+│   │   └── PreviewContent      # 配置プレビュー
+│   │
+│   ├── card/                    # カード関連
+│   │   ├── AnimatedCard        # アニメーション付きカード
+│   │   ├── CardDetails         # カード詳細表示
+│   │   └── CardScore          # スコア表示
+│   │
+│   ├── debug/                   # デバッグ機能
+│   │   └── DebugCardList.tsx   # デバッグ用カードリスト
+│   │
+│   ├── effects/                 # エフェクト表示関連
+│   │   ├── EffectDisplay      # 基本エフェクト
+│   │   ├── EffectRange        # 範囲表示
+│   │   └── EffectPatterns     # エフェクトパターン
+│   │
+│   ├── game/                    # ゲーム進行関連
+│   │   ├── GameController      # ゲーム進行制御
+│   │   └── TurnTransition     # ターン遷移演出
+│   │
+│   ├── ui/                      # UI共通コンポーネント
+│   │   ├── Button.tsx         # ボタン
+│   │   ├── IconButton.tsx     # アイコン付きボタン
+│   │   ├── SoundControl.tsx   # 音声コントロール
+│   │   └── Tooltip.tsx        # ツールチップ
+│   │
+│   └── status/                  # ステータス表示
+│       ├── GameStatus         # ゲーム状態表示
+│       └── ScoreDisplay       # スコア表示
+│
+├── hooks/                       # カスタムフック
+│   ├── useGameState           # ゲーム状態管理
+│   ├── useGameProgress        # 進行状況管理
+│   ├── useEffects            # エフェクト制御
+│   └── useAnimations         # アニメーション制御
+│
+├── utils/
+│   ├── cards/                  # カード関連
+│   ├── effects/               # エフェクト計算
+│   ├── score/                 # スコア計算
+│   ├── sound/                 # 音声管理
+│   │   └── SoundManager.ts   # 音声制御システム
+│   └── common/                # 共通ユーティリティ
+│
+├── constants/                   # 定数定義
+│   ├── cards/                  # カードデータ
+│   └── game/                  # ゲーム設定
+│
+└── types/                      # 型定義
+    ├── base.ts                # 基本型
+    ├── cards.ts              # カード関連の型
+    ├── effects.ts            # エフェクト関連の型
+    └── game.ts               # ゲーム状態の型
+
+public/
+└── sounds/                     # 音声ファイル
+    ├── bgm/
+    │   └── main-theme.mp3    # BGM
+    └── sfx/                   # 効果音
+        ├── card-place.mp3
+        ├── card-flip.mp3
+        ├── effect.mp3
+        ├── turn-end.mp3
+        ├── victory.mp3
+        └── defeat.mp3
+```
+
+## 新機能: サウンドシステム
+- BGM再生機能
+  - メインテーマの自動再生
+  - ミュート切り替え
+- 効果音
+  - カード配置
+  - カード選択
+  - エフェクト発動
+  - ターン終了
+  - 勝利/敗北
+- 音量制御
+  - BGMと効果音の個別音量調整
+  - UIによるサウンドON/OFF切り替え
+
+## 開発環境のセットアップ
+
+### 必要な環境
+- Node.js 18以上
+- npm 8以上
+
+### インストール手順
+```bash
+# リポジトリのクローン
+git clone https://github.com/yourusername/card-battle-game.git
+
+# プロジェクトディレクトリへ移動
+cd card-battle-game
+
+# 依存パッケージのインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+
+# ビルド
+npm run build
+```
+
+### 音声ファイルの配置
+以下のパスに必要な音声ファイルを配置してください：
+```
+public/sounds/bgm/main-theme.mp3
+public/sounds/sfx/card-place.mp3
+public/sounds/sfx/card-flip.mp3
+public/sounds/sfx/effect.mp3
+public/sounds/sfx/turn-end.mp3
+public/sounds/sfx/victory.mp3
+public/sounds/sfx/defeat.mp3
+```
+
+
 5x5のグリッドで展開される戦略的カードバトルゲームです。各ステージで強力なボスと対峙し、戦略的なカード配置で勝利を目指します。
 
 ## デモ

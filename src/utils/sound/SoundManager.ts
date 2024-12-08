@@ -3,11 +3,23 @@ export class SoundManager {
     private bgm: HTMLAudioElement | null = null;
     private sfx: Map<string, HTMLAudioElement> = new Map();
     private isMuted = false;
+
+    private bgmVolume = 0.3;  // BGMのデフォルト音量
+    private sfxVolume = 0.5;  // 効果音のデフォルト音量
   
     private constructor() {
       // BGMの初期設定
       this.bgm = new Audio('/sounds/bgm/main-theme.mp3');
       this.bgm.loop = true;
+
+      if (this.bgm) {
+        this.bgm.volume = this.bgmVolume;
+      }
+      
+      // 効果音の音量設定
+      this.sfx.forEach(sound => {
+        sound.volume = this.sfxVolume;
+      });
       
       // 効果音の初期設定
       const sfxList = {
@@ -34,7 +46,11 @@ export class SoundManager {
   
     playBGM() {
       if (!this.isMuted && this.bgm) {
-        this.bgm.play();
+        // Promiseを返すように修正
+        return this.bgm.play().catch(error => {
+          console.log('BGM autoplay failed:', error);
+          // 自動再生に失敗した場合は静かに失敗
+        });
       }
     }
   
