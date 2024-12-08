@@ -1,4 +1,3 @@
-// src/components/game/GameController.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,20 +8,17 @@ import { GameStatus } from '@/components/status/GameStatus';
 import { AnimatedCard } from '@/components/card/AnimatedCard';
 import { TurnTransition } from '@/components/game/TurnTransition';
 import { useGameState } from '@/hooks/useGameState';
-import { useGameProgress } from '@/hooks/useGameProgress';  // 追加：ステージクリア用
-import { useEffects } from '@/hooks/useEffects';  // 追加：効果範囲表示用
+import { useGameProgress } from '@/hooks/useGameProgress';
+import { useEffects } from '@/hooks/useEffects';
 import type { PlacedCard, Position } from '@/types';
 import DebugCardList from '@/components/debug/DebugCardList';
-import { useParams } from 'next/navigation';
 
 type GameControllerProps = {
   initialStage: number;
 };
 
 export function GameController({ initialStage }: GameControllerProps) {
-  const params = useParams();
-  const currentStage = Number(params.stage) || 1;
-  const { gameState, actions } = useGameState(currentStage);
+  const { gameState, actions } = useGameState(initialStage);
   const { clearStage } = useGameProgress();
   const { hoveredPosition, setHoveredPosition, effectRange } = useEffects(gameState.board);
   const [showTurnTransition, setShowTurnTransition] = useState(false);
@@ -38,7 +34,6 @@ export function GameController({ initialStage }: GameControllerProps) {
     actions.placeCard(position);
   };
 
-  // ターン終了時の処理
   const handleEndTurn = () => {
     if (!gameState.canEndTurn) return;
     
@@ -53,20 +48,12 @@ export function GameController({ initialStage }: GameControllerProps) {
 
   const handleGameEnd = () => {
     if (gameState.status.winner === 'ally') {
-      clearStage(gameState.currentStage);
+      clearStage(initialStage);
       window.location.href = '/';
     } else {
       actions.resetGame();
     }
   };
-
-  if (!gameState.currentHand.length && !gameState.status.gameOver && !gameState.canEndTurn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100">
@@ -90,7 +77,6 @@ export function GameController({ initialStage }: GameControllerProps) {
       </AnimatePresence>
       
       <div className="max-w-5xl mx-auto p-4">
-        {/* ゲームヘッダー */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,15 +86,14 @@ export function GameController({ initialStage }: GameControllerProps) {
             Card Battle Game
           </h1>
           {process.env.NODE_ENV === 'development' && (
-  <DebugCardList
-    onSelectCard={(card) => actions.selectCard(card)}
-    className="mt-2"
-  />
-)}
+            <DebugCardList
+              onSelectCard={(card) => actions.selectCard(card)}
+              className="mt-2"
+            />
+          )}
           <p className="text-gray-400">戦略的に配置して勝利を目指そう！</p>
         </motion.div>
         
-        {/* メインゲームエリア */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 手札エリア */}
           <div className="lg:col-span-1">
@@ -138,56 +123,56 @@ export function GameController({ initialStage }: GameControllerProps) {
 
           {/* ゲームボードエリア */}
           <div className="lg:col-span-2">
-        <GameStatus status={gameState.status} />
-        <Board
-          board={gameState.board}
-          selectedCard={gameState.selectedCard}
-          onPlaceCard={handlePlaceCard}
-          onHoverCard={setHoveredCard}
-          effectRange={effectRange}
-          hoveredPosition={hoveredPosition}
-          setHoveredPosition={setHoveredPosition}
-        />
+            <GameStatus status={gameState.status} />
+            <Board
+              board={gameState.board}
+              selectedCard={gameState.selectedCard}
+              onPlaceCard={handlePlaceCard}
+              onHoverCard={setHoveredCard}
+              effectRange={effectRange}
+              hoveredPosition={hoveredPosition}
+              setHoveredPosition={setHoveredPosition}
+            />
             
             {/* アクションボタン */}
             <div className="flex justify-between items-center mt-4">
-            <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-4 py-2 bg-gray-700 text-white rounded-lg
-              ${gameState.history.length > 0 ? 'hover:bg-gray-600' : 'opacity-50 cursor-not-allowed'}
-              transition-colors`}
-            onClick={actions.undoLastMove}
-            disabled={gameState.history.length === 0}
-          >
-            元に戻す
-          </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-2 bg-gray-700 text-white rounded-lg
+                  ${gameState.history.length > 0 ? 'hover:bg-gray-600' : 'opacity-50 cursor-not-allowed'}
+                  transition-colors`}
+                onClick={actions.undoLastMove}
+                disabled={gameState.history.length === 0}
+              >
+                元に戻す
+              </motion.button>
               
-          {gameState.canEndTurn && !gameState.status.gameOver && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
-              onClick={handleEndTurn}
-            >
-              {gameState.status.turn === 8 ? "決着をつける" : "次のターンへ"}
-            </motion.button>
-          )}
+              {gameState.canEndTurn && !gameState.status.gameOver && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+                  onClick={handleEndTurn}
+                >
+                  {gameState.status.turn === 8 ? "決着をつける" : "次のターンへ"}
+                </motion.button>
+              )}
 
-{gameState.status.gameOver && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-4 py-2 rounded-lg ${
-                gameState.status.winner === 'ally' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-red-600 text-white'
-              }`}
-              onClick={handleGameEnd}
-            >
-              {gameState.status.winner === 'ally' ? 'クリア！' : 'もう一度プレイ'}
-            </motion.button>
-          )}
+              {gameState.status.gameOver && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 rounded-lg ${
+                    gameState.status.winner === 'ally' 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-red-600 text-white'
+                  }`}
+                  onClick={handleGameEnd}
+                >
+                  {gameState.status.winner === 'ally' ? 'クリア！' : 'もう一度プレイ'}
+                </motion.button>
+              )}
             </div>
           </div>
         </div>

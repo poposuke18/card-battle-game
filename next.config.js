@@ -11,19 +11,7 @@ const nextConfig = {
   
   // パスの設定
   basePath: process.env.GITHUB_ACTIONS ? '/card-battle-game' : '',
-  assetPrefix: process.env.GITHUB_ACTIONS ? '/card-battle-game' : '',
-
-  // 静的ページの生成設定（GitHub Pages用）
-  ...(process.env.GITHUB_ACTIONS && {
-    generateStaticParams: async () => {
-      return [
-        { stage: '1' },
-        { stage: '2' },
-        { stage: '3' },
-        { stage: '4' }
-      ]
-    }
-  })
+  assetPrefix: process.env.GITHUB_ACTIONS ? '/card-battle-game' : ''
 }
 
 module.exports = nextConfig

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameProgress } from '@/hooks/useGameProgress';
 
@@ -8,6 +9,7 @@ export default function TitleScreen() {
   const [showStageSelect, setShowStageSelect] = useState(false);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const { isStageAvailable, isStageCleared } = useGameProgress();
+  const router = useRouter();
 
   const handleStartGame = () => {
     setShowStageSelect(true);
@@ -16,8 +18,7 @@ export default function TitleScreen() {
   const handleStageSelect = (stage: number) => {
     setSelectedStage(stage);
     setTimeout(() => {
-      const basePath = process.env.NODE_ENV === 'production' ? '/card-battle-game' : '';
-      window.location.href = `${basePath}/game/${stage}`;
+      router.push(`/game/${stage}`);
     }, 1500);
   };
 
